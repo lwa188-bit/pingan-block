@@ -1,8 +1,8 @@
 # 平安街区 / Safe Streets
 
-一组零依赖、俯视角像素风的防御性驾驶网页小游戏。当前有十七个可玩场景。
+一组零依赖、俯视角像素风的防御性驾驶网页小游戏。当前公开十个场景（EP.01–EP.10）。
 
-**在线试玩**：https://37keux3do9pxswm8rv7.traesite.cn
+**在线试玩**：https://lwa188-bit.github.io/pingan-block/
 
 **演示视频**：[demo-video/平安街区-演示视频.mp4](demo-video/平安街区-演示视频.mp4)（80 秒，4 个场景的完整正确操作闭环）
 
@@ -15,18 +15,10 @@
 - **08 停靠车辆突然开门（“开门杀”） / Parked-Car Dooring**
 - **09 倒车时的车后盲区 / Reversing Blind Spots**
 - **10 非机动车逆行与突然变道 / Wrong-Way Riders & Sudden Swerves**
-- **11 绿灯路口与闯红灯车辆 / Green Lights & Red-Light Runners**
-- **12 无信号灯路口的交叉来车 / Unsignalized Cross Traffic**
-- **13 黄灯亮起 / The Yellow Light**
-- **14 近距加塞与空间恢复 / Sudden Cut-Ins & Space Recovery**
-- **15 前车急刹与多车连环追尾 / Chain-Reaction Braking**
-- **16 前车绕开之后，别跟着冲 / Revealed Stopped Vehicle**
-- **17 被大型车辆遮挡的信号灯与路口 / Obscured Signals & Intersections**
-- **18 变道时目标车道盲区内有车 / Lane-Change Blind Spots**
 
-03 前车突然制动已于 2026-11-11 从系列首页下线，代码与逻辑测试保留，但不作为当前可玩内容展示。
+03 前车突然制动已于 2026-11-11 从系列首页下线。EP.11–EP.19 仍在本地继续打磨，暂未纳入本公开仓库。
 
-19 大型车辆周围的多处盲区已于 2026-11-18 从系列首页下线，代码与逻辑测试保留，但不作为当前可玩内容展示。
+> 下文「操作」「教学点」「评分」「文件结构」章节保留了完整的设计与测试记录，其中涉及 EP.11–EP.19 的内容仅作开发记录，对应文件不在本仓库内。
 
 ## 直接试玩
 
@@ -41,14 +33,6 @@
 - `dooring.html`：08 停靠车辆突然开门（“开门杀”）。
 - `reversing-blind-spot.html`：09 倒车时的车后盲区。
 - `nonmotor-mix.html`：10 非机动车逆行与突然变道。
-- `red-light-runner.html`：11 绿灯路口与闯红灯车辆。
-- `unsignalized-cross-traffic.html`：12 无信号灯路口的交叉来车。
-- `yellow-light-decision.html`：13 黄灯亮起。
-- `sudden-cut-in.html`：14 近距加塞与空间恢复。
-- `multi-car-pileup.html`：15 前车急刹与多车连环追尾。
-- `revealed-stopped-vehicle.html`：16 前车绕开之后，别跟着冲。
-- `obscured-signal-intersection.html`：17 被大型车辆遮挡的信号灯与路口。
-- `lane-change-blind-spot.html`：18 变道时目标车道盲区内有车。
 
 用新版 Chrome、Safari、Edge 或 Firefox 打开 HTML 文件即可，无需安装依赖或构建。也可在当前目录运行：
 
@@ -60,7 +44,7 @@ python3 -m http.server 8000
 
 - 展示首页：`http://localhost:8000`
 - 紧凑目录：`http://localhost:8000/games.html`
-- 各关卡：`http://localhost:8000/bus-ghost.html`、`/crosswalk.html`、`/parked-cars.html`、`/truck-inner-wheel.html`、`/blind-junction.html`、`/crosswalk-turnback.html`、`/dooring.html`、`/reversing-blind-spot.html`、`/nonmotor-mix.html`、`/red-light-runner.html`、`/unsignalized-cross-traffic.html`、`/yellow-light-decision.html`、`/sudden-cut-in.html`、`/multi-car-pileup.html`、`/revealed-stopped-vehicle.html`、`/obscured-signal-intersection.html`、`/lane-change-blind-spot.html`
+- 各关卡：`http://localhost:8000/bus-ghost.html`、`/crosswalk.html`、`/parked-cars.html`、`/truck-inner-wheel.html`、`/blind-junction.html`、`/crosswalk-turnback.html`、`/dooring.html`、`/reversing-blind-spot.html`、`/nonmotor-mix.html`
 
 旧的 `index.html?seed=1234` 分享链接会自动跳转到新游戏页，并保留种子、其他查询参数和锚点。新链接推荐使用 `bus-ghost.html?seed=1234` 等独立关卡地址。
 

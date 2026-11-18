@@ -61,7 +61,10 @@
   <script src="tests/lane-change-blind-spot-cases.js"></script>
   <script src="tests/large-vehicle-blind-zones-cases.js"></script>
   <script>
-    const suites = [BusGameTests, CrosswalkTests, BrakingTests, ParkedCarsTests, BlindJunctionTests, CrosswalkTurnbackTests, DooringTests, TruckInnerWheelTests, ReversingBlindSpotTests, NonmotorMixTests, RedLightRunnerTests, UnsignalizedCrossTrafficTests, YellowLightDecisionTests, SuddenCutInTests, MultiCarPileupTests, RevealedStoppedVehicleTests, ObscuredSignalIntersectionTests, LaneChangeTests, LargeVehicleTests];
+    const candidates = ['BusGameTests', 'CrosswalkTests', 'BrakingTests', 'ParkedCarsTests', 'BlindJunctionTests', 'CrosswalkTurnbackTests', 'DooringTests', 'TruckInnerWheelTests', 'ReversingBlindSpotTests', 'NonmotorMixTests', 'RedLightRunnerTests', 'UnsignalizedCrossTrafficTests', 'YellowLightDecisionTests', 'SuddenCutInTests', 'MultiCarPileupTests', 'RevealedStoppedVehicleTests', 'ObscuredSignalIntersectionTests', 'LaneChangeTests', 'LargeVehicleTests'];
+    const suites = candidates
+      .map(function (name) { return typeof window[name] !== 'undefined' ? window[name] : null; })
+      .filter(function (suite) { return !!suite; });
     const report = suites.reduce(function (total, suite) {
       const result = suite.run();
       return {

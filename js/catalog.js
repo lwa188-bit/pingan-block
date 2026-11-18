@@ -157,7 +157,7 @@
     {
       id: 'red-light-runner',
       episode: '11',
-      status: 'playable',
+      status: 'hidden',
       href: 'red-light-runner.html',
       art: 'red-light-runner',
       title: {
@@ -172,7 +172,7 @@
     {
       id: 'unsignalized-cross-traffic',
       episode: '12',
-      status: 'playable',
+      status: 'hidden',
       href: 'unsignalized-cross-traffic.html',
       art: 'cross-traffic',
       title: {
@@ -187,7 +187,7 @@
     {
       id: 'yellow-light-decision',
       episode: '13',
-      status: 'playable',
+      status: 'hidden',
       href: 'yellow-light-decision.html',
       art: 'yellow-light-decision',
       title: {
@@ -202,7 +202,7 @@
     {
       id: 'sudden-cut-in',
       episode: '14',
-      status: 'playable',
+      status: 'hidden',
       href: 'sudden-cut-in.html',
       art: 'sudden-cut-in',
       title: {
@@ -217,7 +217,7 @@
     {
       id: 'multi-car-pileup',
       episode: '15',
-      status: 'playable',
+      status: 'hidden',
       href: 'multi-car-pileup.html',
       art: 'multi-car-pileup',
       title: {
@@ -232,7 +232,7 @@
     {
       id: 'revealed-stopped-vehicle',
       episode: '16',
-      status: 'playable',
+      status: 'hidden',
       href: 'revealed-stopped-vehicle.html',
       art: 'revealed-stopped-vehicle',
       title: {
@@ -247,7 +247,7 @@
     {
       id: 'obscured-signal-intersection',
       episode: '17',
-      status: 'playable',
+      status: 'hidden',
       href: 'obscured-signal-intersection.html',
       art: 'obscured-signal-intersection',
       title: {
@@ -262,7 +262,7 @@
     {
       id: 'lane-change-blind-spot',
       episode: '18',
-      status: 'playable',
+      status: 'hidden',
       href: 'lane-change-blind-spot.html',
       art: 'lane-change-blind-spot',
       title: {
