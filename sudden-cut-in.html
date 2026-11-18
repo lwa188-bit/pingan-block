@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101c26">
+  <meta name="description" content="近距加塞：识别并线前兆，平稳让速并重新建立安全空间。" data-i18n-content="scene.cutIn.description">
+  <title data-i18n="scene.cutIn.documentTitle">近距加塞｜防御性驾驶训练</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .cut-in-sign { display: block; width: 132px; height: 76px; background: #26383e; overflow: hidden; }
+    .cut-in-sign::before { content: ""; position: absolute; left: 62px; top: 0; bottom: 0; width: 3px; background: repeating-linear-gradient(to bottom, #d7dbc4 0 9px, transparent 9px 17px); }
+    .cut-in-sign::after { content: ""; position: absolute; left: 0; right: 0; top: 53px; height: 2px; background: #d7dbc422; box-shadow: 0 -28px #d7dbc422; }
+    .cut-in-sign .cut-player { position: absolute; z-index: 3; left: 82px; top: 35px; width: 18px; height: 31px; background: var(--coral); border: 3px solid #142832; }
+    .cut-in-sign .cut-merger { position: absolute; z-index: 4; left: 48px; top: 4px; width: 18px; height: 31px; background: #e7bd5c; border: 3px solid #142832; transform: rotate(20deg); }
+    .cut-in-sign .cut-lead { position: absolute; z-index: 2; left: 82px; top: -7px; width: 18px; height: 27px; background: #7fa6b2; border: 3px solid #142832; }
+    .cut-in-sign .cut-gap { position: absolute; z-index: 2; left: 79px; top: 22px; width: 24px; height: 10px; border-left: 2px dashed var(--mint); border-right: 2px dashed var(--mint); }
+    body[data-scene="sudden-cut-in"] .controls-slot { min-height: 0; margin-top: 0; }
+    body[data-scene="sudden-cut-in"] .controls-slot:has(.demo-overlay:not([hidden])) { min-height: 88px; margin-top: 12px; }
+    body[data-scene="sudden-cut-in"] .controls-slot .demo-overlay { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: #142a34; border: 1px solid #3f625a; }
+    body[data-scene="sudden-cut-in"] .controls-slot .demo-caption { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; }
+    body[data-scene="sudden-cut-in"] .demo-caption strong { font-size: 12px; }
+    body[data-scene="sudden-cut-in"] .demo-caption small { font-size: 10px; line-height: 1.45; }
+    body[data-scene="sudden-cut-in"] .touch-controls { grid-template-columns: 1fr; margin-top: 12px; }
+    body[data-scene="sudden-cut-in"] .control-button { min-height: 64px; }
+    @media (min-width: 761px) {
+      body[data-scene="sudden-cut-in"] .game-column { max-width: clamp(290px, calc((100vh - 245px) * .5625), 430px); max-width: clamp(290px, calc((100dvh - 245px) * .5625), 430px); }
+    }
+    @media (min-width: 761px) and (max-height: 800px) {
+      body[data-scene="sudden-cut-in"] .game-column { max-width: clamp(270px, calc((100vh - 220px) * .5625), 430px); max-width: clamp(270px, calc((100dvh - 220px) * .5625), 430px); }
+      body[data-scene="sudden-cut-in"] .control-button { min-height: 58px; }
+    }
+    @media (max-width: 760px) and (min-height: 760px) {
+      body[data-scene="sudden-cut-in"] .game-column { width: 100%; max-width: min(410px, calc((100dvh - 247px) * .5625)); min-width: 280px; }
+    }
+  </style>
+  <script defer src="js/i18n.js"></script>
+  <script defer src="js/model.js"></script>
+  <script defer src="js/draw.js"></script>
+  <script defer src="js/scoring.js"></script>
+  <script defer src="js/input.js"></script>
+  <script defer src="js/scenes/sudden-cut-in.js"></script>
+  <script defer src="js/main.js"></script>
+</head>
+<body data-scene="sudden-cut-in">
+  <div class="page-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html" data-language-link data-i18n-aria="common.homeAria"><span class="brand-mark" aria-hidden="true">14</span><span><strong class="brand-full" data-i18n="scene.cutIn.brand">近距加塞</strong><strong class="brand-compact" data-i18n="scene.cutIn.brandShort">空间恢复</strong><small data-i18n="game.brandSub">防御性驾驶演练</small></span></a>
+      <div class="topbar-right"><span class="episode" data-i18n="scene.cutIn.episode">训练 14 / 近距加塞</span><a class="home-link" href="games.html" data-language-link data-i18n-aria="common.homeAria"><span aria-hidden="true">←</span><span data-i18n="common.home">游戏列表</span></a><button class="language-toggle" type="button" data-language-toggle>EN</button><button id="pause-button" class="icon-button" type="button" data-i18n-aria="game.pause" data-i18n-title="game.pauseTitle" aria-label="暂停游戏" title="暂停（P）" disabled>Ⅱ</button></div>
+    </header>
+
+    <main class="game-layout">
+      <section class="game-column" data-i18n-aria="game.region" aria-label="游戏区域">
+        <div id="game-frame" class="game-frame">
+          <canvas id="game-canvas" width="360" height="640" role="img" data-i18n-aria="scene.cutIn.canvasAria" aria-label="俯视角同向双车道。观察相邻车辆并线，提前松油并平稳恢复安全车距。"><span data-i18n="game.canvasFallback">你的浏览器不支持 Canvas，请使用新版浏览器。</span></canvas>
+          <div class="hud" aria-live="polite"><div class="hud-top"><span id="progress-label" class="hud-chip">空间恢复 0 / 3</span><span id="timer-label" class="hud-chip">00:00</span></div><div id="coach-bubble" class="coach-bubble"><span id="coach-text">保持合理车距，留意相邻车辆</span></div><div class="speed-card"><div><span id="speed-value">45</span><small>km/h</small></div><span id="speed-status" class="speed-status">空间稳定</span></div></div>
+          <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+          <div id="start-screen" class="screen-overlay">
+            <div class="pixel-sign cut-in-sign" aria-hidden="true"><span class="cut-player"></span><span class="cut-merger"></span><span class="cut-lead"></span><span class="cut-gap"></span></div>
+            <p class="eyebrow" data-i18n="scene.cutIn.startEyebrow">防御性驾驶演练 · 14</p>
+            <h1><span data-i18n="scene.cutIn.startTitleA">近距加塞，</span><br><span data-i18n="scene.cutIn.startTitleB">不抢路，找回空间</span></h1>
+            <p class="lead"><span data-i18n="scene.cutIn.startLeadA">看清旁车的移动和前方车流。</span><br><span data-i18n="scene.cutIn.startLeadB">提前松油、平稳让速，等间距与相对速度都稳定后再恢复通行。</span></p>
+            <div class="lesson-strip"><span><b>01</b><em data-i18n="scene.cutIn.lesson1">识别前兆，不加速封堵</em></span><span><b>02</b><em data-i18n="scene.cutIn.lesson2">平稳让速，重新建立空间</em></span><span><b>03</b><em data-i18n="scene.cutIn.lesson3">不过度急刹，不猛打方向</em></span></div>
+            <button id="start-button" class="primary-button" type="button"><span data-i18n="game.startButton">开始安全演练</span><span aria-hidden="true">→</span></button>
+            <p class="key-hint" data-i18n="scene.cutIn.keyHint">W / ↑ 加速 · S / ↓ / 空格制动 · 松开踏板自然减速 · P 暂停</p>
+          </div>
+
+          <div id="pause-screen" class="screen-overlay compact" hidden><p class="eyebrow" data-i18n="game.paused">演练已暂停</p><h2 data-i18n="game.pauseTitleHeading">休息一下</h2><p class="lead" data-i18n="game.pauseText">暂停时间不会计入成绩。</p><button id="resume-button" class="primary-button" type="button"><span data-i18n="game.resumeButton">继续驾驶</span><span aria-hidden="true">→</span></button><button id="pause-restart-button" class="text-button" type="button" data-i18n="game.restart">重新开始本局</button></div>
+
+          <div id="failure-screen" class="screen-overlay compact failure-screen" hidden>
+            <div class="warning-icon" aria-hidden="true">!</div><p class="eyebrow" data-i18n="game.failureEyebrow">碰撞前 · 演练暂停</p><h2 data-i18n="scene.cutIn.failure.title">别抢位置，先恢复余量</h2><p id="failure-reason" class="lead"></p>
+            <div class="mini-lesson"><span data-i18n="game.correctAction">正确做法</span><p data-i18n="scene.cutIn.failureLesson">发现旁车靠近时提前松油，必要时渐进制动。让对方完成并线，继续控速到车距和相对速度都稳定，不加速封堵，也不猛打方向。</p></div>
+            <button id="demo-button" class="primary-button" type="button"><span data-i18n="game.watchDemo">看看正确示范</span><span aria-hidden="true">▶</span></button>
+            <button id="retry-button" class="text-button" type="button" data-i18n="scene.cutIn.skipDemoRetry">跳过示范，从本事件前重试</button>
+            <button id="role-replay-button" class="text-button" type="button" data-i18n="scene.cutIn.roleReplay">用相同事件查看动态空间变化</button>
+          </div>
+
+          <div id="result-screen" class="screen-overlay result-screen" hidden>
+            <p id="result-kicker" class="eyebrow">演练完成</p><div class="grade-medal"><span id="result-grade">A</span><small data-i18n="game.gradeCaption">安全评价</small></div><h2 id="result-title"></h2><p id="result-summary" class="lead"></p><div class="result-score"><strong id="result-total">0</strong><span>/ 100</span></div>
+            <div class="result-grid"><div><span data-i18n="game.safety">安全</span><strong id="result-safety">0 / 40</strong></div><div><span data-i18n="game.observation">观察</span><strong id="result-observation">0 / 30</strong></div><div><span data-i18n="game.efficiency">效率</span><strong id="result-efficiency">0 / 20</strong></div><div><span data-i18n="game.smooth">平稳</span><strong id="result-smooth">0 / 10</strong></div></div>
+            <div id="result-advice" class="mini-lesson"><span data-i18n="result.adviceLabel">下一次可以更好</span><p id="result-advice-text"></p></div>
+            <div class="result-actions"><button id="new-game-button" class="primary-button" type="button"><span data-i18n="scene.cutIn.newGame">再练三个并线事件</span><span aria-hidden="true">→</span></button><button id="same-game-button" class="text-button" type="button" data-i18n="game.sameGame">重玩同局</button><button id="result-role-button" class="text-button" type="button" data-i18n="scene.cutIn.roleReplayResult">复盘最后一个事件的空间变化</button></div>
+          </div>
+        </div>
+
+        <div class="controls-slot"><div id="demo-screen" class="demo-overlay" hidden><div class="demo-caption"><span class="demo-badge" data-i18n="game.demoBadge">正确示范</span><strong id="demo-step"></strong><small id="demo-substep"></small></div><button id="skip-demo-button" class="text-button" type="button" data-i18n="game.skipDemo">跳过示范</button></div></div>
+        <div class="touch-controls" data-i18n-aria="game.controls" aria-label="驾驶控制"><div class="pedal-controls"><button class="control-button throttle" type="button" data-control="throttle" data-i18n-aria="game.accelerate" aria-label="加速"><span aria-hidden="true">▲</span><small data-i18n="game.accelerate">加速</small></button><button class="control-button brake" type="button" data-control="brake" data-i18n-aria="game.brake" aria-label="制动"><span aria-hidden="true">▼</span><small data-i18n="game.brake">制动</small></button></div></div>
+      </section>
+
+      <aside class="side-panel">
+        <section class="mission-card"><p class="eyebrow" data-i18n="game.missionEyebrow">本次训练</p><h2><span data-i18n="scene.cutIn.missionTitleA">让出一点速度，</span><br><span data-i18n="scene.cutIn.missionTitleB">换回安全余量。</span></h2><p data-i18n="scene.cutIn.missionText">每局包含合理并线、近距并入后匀速、近距并入后减速。车辆沿真实轨迹移动；根据间距和速度差行动，不靠争抢或急刹。</p><div class="risk-key"><span class="risk-swatch"></span><div><strong data-i18n="scene.cutIn.riskZone">动态安全空间</strong><small data-i18n="scene.cutIn.riskDescription">前兆后及时让速，持续到间距与相对速度稳定</small></div></div></section>
+        <section class="score-card"><div class="section-heading"><h3 data-i18n="game.rating">驾驶评价</h3><span data-i18n="game.points100">100 分制</span></div><div class="score-row"><span><i class="dot safety"></i><em data-i18n="game.safety">安全</em></span><strong>40</strong><small data-i18n="scene.cutIn.safetyRule">避免侧碰、追尾与危险近距</small></div><div class="score-row"><span><i class="dot observe"></i><em data-i18n="game.observation">观察</em></span><strong>30</strong><small data-i18n="scene.cutIn.observationRule">准备 2 + 前兆响应 3 + 空间恢复 3 + 稳定通行 2</small></div><div class="score-row"><span><i class="dot efficient"></i><em data-i18n="game.efficiency">效率</em></span><strong>20</strong><small data-i18n="scene.cutIn.efficiencyRule">必要让速不扣分，安全后持续低速会扣分</small></div><div class="score-row"><span><i class="dot smooth"></i><em data-i18n="game.smooth">平稳</em></span><strong>10</strong><small data-i18n="scene.cutIn.smoothRule">避免封堵加速、可预防急刹和反复踩放</small></div></section>
+        <section class="live-card"><div class="section-heading"><h3 data-i18n="game.live">本次表现</h3><span id="live-seed">#0000</span></div><div class="live-stats"><div><strong id="slow-count">0</strong><span data-i18n="scene.cutIn.live.stable">空间稳定</span></div><div><strong id="brake-count">0</strong><span data-i18n="game.hardBrakes">急刹</span></div><div><strong id="passed-count">0</strong><span data-i18n="scene.cutIn.live.safe">安全事件</span></div></div><div class="smooth-meter"><span id="smooth-meter-fill"></span></div><small id="smooth-caption">平稳驾驶 10 / 10</small></section>
+        <p class="side-note"><span aria-hidden="true">◇</span><em data-i18n="scene.cutIn.sideNote">教学车距随速度与相对运动变化，不代表所有条件下的固定安全数值。实际驾驶请保持合理车距并遵守当地法规。</em></p>
+      </aside>
+    </main>
+    <footer data-i18n="common.footer">防御性驾驶科普 Demo · 具体交通规则请以当地法规为准</footer>
+  </div>
+  <noscript><span data-i18n="game.noscript">请启用 JavaScript 后进行安全演练。</span><br>Enable JavaScript to play. <a href="games.html">游戏列表 / All games</a></noscript>
+</body>
+</html>

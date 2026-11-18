@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101c26">
+  <meta name="description" content="前车绕开之后，别跟着冲：识别前车异常避让，提前控速，看清本车道后平稳停车或继续。" data-i18n-content="scene.revealedVehicle.description">
+  <title data-i18n="scene.revealedVehicle.documentTitle">前车绕开之后，别跟着冲｜防御性驾驶训练</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .revealed-sign { display: block; width: 128px; height: 76px; background: #26383e; overflow: hidden; }
+    .revealed-sign::before { content: ""; position: absolute; left: 63px; top: 0; bottom: 0; border-left: 2px dashed #7e9188; }
+    .revealed-sign .sign-player { position: absolute; left: 81px; bottom: 3px; width: 20px; height: 31px; background: var(--mint); border: 3px solid #142832; }
+    .revealed-sign .sign-leader { position: absolute; left: 39px; top: 20px; width: 20px; height: 31px; background: var(--yellow); border: 3px solid #142832; transform: rotate(-13deg); }
+    .revealed-sign .sign-stopped { position: absolute; left: 81px; top: -4px; width: 20px; height: 31px; background: #7fa6b2; border: 3px solid #142832; }
+    .revealed-sign .sign-route { position: absolute; left: 51px; top: 43px; width: 43px; border-top: 2px dashed #ffe292; transform: rotate(-28deg); }
+    body[data-scene="revealed-stopped-vehicle"] .touch-controls { grid-template-columns: 1fr; }
+    body[data-scene="revealed-stopped-vehicle"] .pedal-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    body[data-scene="revealed-stopped-vehicle"] .controls-slot { position: relative; min-height: 0; margin-top: 0; }
+    body[data-scene="revealed-stopped-vehicle"] .controls-slot:has(.demo-overlay:not([hidden])) { min-height: 96px; margin-top: 12px; }
+    body[data-scene="revealed-stopped-vehicle"] .controls-slot .demo-overlay { inset: 0; display: flex; align-items: center; justify-content: space-between; gap: 9px; padding: 9px 10px; background: #142a34; border: 1px solid #3f625a; }
+    body[data-scene="revealed-stopped-vehicle"] .controls-slot .demo-overlay[hidden] { display: none; }
+    body[data-scene="revealed-stopped-vehicle"] .demo-caption { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; }
+    body[data-scene="revealed-stopped-vehicle"] .demo-caption strong { font-size: 11px; }
+    body[data-scene="revealed-stopped-vehicle"] .demo-caption small { font-size: 9px; line-height: 1.4; }
+    body[data-scene="revealed-stopped-vehicle"] .demo-actions { display: flex; flex: 0 0 auto; flex-direction: column; gap: 4px; align-items: flex-end; }
+    body[data-scene="revealed-stopped-vehicle"] .demo-actions .text-button { margin: 0; font-size: 9px; white-space: nowrap; }
+    @media (max-width: 370px) { .revealed-sign { transform: scale(.88); transform-origin: center; } }
+  </style>
+  <script defer src="js/i18n.js"></script>
+  <script defer src="js/model.js"></script>
+  <script defer src="js/draw.js"></script>
+  <script defer src="js/scoring.js"></script>
+  <script defer src="js/input.js"></script>
+  <script defer src="js/scenes/revealed-stopped-vehicle.js"></script>
+  <script defer src="js/main.js"></script>
+</head>
+<body data-scene="revealed-stopped-vehicle">
+  <div class="page-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html" data-language-link data-i18n-aria="common.homeAria">
+        <span class="brand-mark" aria-hidden="true">16</span>
+        <span><strong class="brand-full" data-i18n="scene.revealedVehicle.brand">前车绕开之后，别跟着冲</strong><strong class="brand-compact" data-i18n="scene.revealedVehicle.brandShort">前车绕开之后</strong><small data-i18n="game.brandSub">防御性驾驶演练</small></span>
+      </a>
+      <div class="topbar-right">
+        <span class="episode" data-i18n="scene.revealedVehicle.episode">训练 16 / 遮挡显露</span>
+        <a class="home-link" href="games.html" data-language-link data-i18n-aria="common.homeAria"><span aria-hidden="true">←</span><span data-i18n="common.home">游戏列表</span></a>
+        <button class="language-toggle" type="button" data-language-toggle>EN</button>
+        <button id="pause-button" class="icon-button" type="button" data-i18n-aria="game.pause" data-i18n-title="game.pauseTitle" aria-label="暂停游戏" title="暂停（P）" disabled>Ⅱ</button>
+      </div>
+    </header>
+
+    <main class="game-layout">
+      <section class="game-column" data-i18n-aria="game.region" aria-label="游戏区域">
+        <div id="game-frame" class="game-frame">
+          <canvas id="game-canvas" width="360" height="640" role="img" data-i18n-aria="scene.revealedVehicle.canvasAria" aria-label="同向双车道。前车连续向左绕行，静止故障车从真实遮挡中逐渐显露；先控速，再停车或继续。">
+            <span data-i18n="game.canvasFallback">你的浏览器不支持 Canvas，请使用新版浏览器。</span>
+          </canvas>
+          <div class="hud" aria-live="polite">
+            <div class="hud-top"><span id="progress-label" class="hud-chip">遮挡显露 0 / 3</span><span id="timer-label" class="hud-chip">00:00</span></div>
+            <div id="coach-bubble" class="coach-bubble"><span class="coach-icon" aria-hidden="true">!</span><span id="coach-text">留意前车动向，保留自己的余量</span></div>
+            <div class="speed-card"><div><span id="speed-value">0</span><small>km/h</small></div><span id="speed-status" class="speed-status">准备出发</span></div>
+          </div>
+          <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+          <div id="start-screen" class="screen-overlay">
+            <div class="pixel-sign revealed-sign" aria-hidden="true"><span class="sign-player"></span><span class="sign-leader"></span><span class="sign-stopped"></span><span class="sign-route"></span></div>
+            <p class="eyebrow" data-i18n="scene.revealedVehicle.startEyebrow">防御性驾驶演练 · 16</p>
+            <h1><span data-i18n="scene.revealedVehicle.startTitleA">前车绕开之后，</span><br><span data-i18n="scene.revealedVehicle.startTitleB">别跟着冲</span></h1>
+            <p class="lead"><span data-i18n="scene.revealedVehicle.startLeadA">前车突然绕行，可能是在躲避静止车辆。</span><br><span data-i18n="scene.revealedVehicle.startLeadB">先控速、留空间，看清自己的车道再行动。</span></p>
+            <div class="lesson-strip">
+              <span><b>01</b><em data-i18n="scene.revealedVehicle.lesson1">把异常变道当作预警</em></span>
+              <span><b>02</b><em data-i18n="scene.revealedVehicle.lesson2">显露前保留停车余量</em></span>
+              <span><b>03</b><em data-i18n="scene.revealedVehicle.lesson3">看清后停车或继续</em></span>
+            </div>
+            <button id="start-button" class="primary-button" type="button"><span data-i18n="game.startButton">开始安全演练</span><span aria-hidden="true">→</span></button>
+            <p class="key-hint" data-i18n="scene.revealedVehicle.keyHint">键盘 W / ↑ 加速 · S / ↓ / 空格制动 · 本关不变道</p>
+          </div>
+
+          <div id="pause-screen" class="screen-overlay compact" hidden>
+            <p class="eyebrow" data-i18n="game.paused">演练已暂停</p><h2 data-i18n="game.pauseTitleHeading">休息一下</h2><p class="lead" data-i18n="game.pauseText">暂停时间不会计入成绩。</p>
+            <button id="resume-button" class="primary-button" type="button"><span data-i18n="game.resumeButton">继续驾驶</span><span aria-hidden="true">→</span></button>
+            <button id="pause-restart-button" class="text-button" type="button" data-i18n="game.restart">重新开始本局</button>
+          </div>
+
+          <div id="failure-screen" class="screen-overlay compact failure-screen" hidden>
+            <div class="warning-icon" aria-hidden="true">!</div><p class="eyebrow" data-i18n="game.failureEyebrow">碰撞前 · 演练暂停</p>
+            <h2><span data-i18n="scene.revealedVehicle.failureTitleA">前车绕开了，</span><br><span data-i18n="scene.revealedVehicle.failureTitleB">不代表你的车道空了。</span></h2>
+            <p id="failure-reason" class="lead">此前的车距和速度消耗了显露后的停车余量。</p>
+            <div class="mini-lesson"><span data-i18n="game.correctAction">正确做法</span><p data-i18n="scene.revealedVehicle.failureLesson">看到转向灯和连续绕行就先松油、渐进控速，不跟随加速。静止车显露后平稳停稳；确认畅通则及时继续。</p></div>
+            <button id="demo-button" class="primary-button" type="button"><span data-i18n="game.watchDemo">看看正确示范</span><span aria-hidden="true">▶</span></button>
+            <button id="retry-button" class="text-button" type="button" data-i18n="scene.revealedVehicle.skipDemoRetry">跳过示范，从本段起点重试</button>
+            <button id="role-replay-button" class="text-button" type="button" data-i18n="scene.revealedVehicle.roleReplay">复盘我的视野与道路全景</button>
+          </div>
+
+          <div id="result-screen" class="screen-overlay result-screen" hidden>
+            <p id="result-kicker" class="eyebrow">演练完成</p><div class="grade-medal"><span id="result-grade">A</span><small data-i18n="game.gradeCaption">安全评价</small></div>
+            <h2 id="result-title">平稳防御</h2><p id="result-summary" class="lead">你在障碍显露前就开始保留余量。</p>
+            <div class="result-score"><strong id="result-total">96</strong><span>/ 100</span></div>
+            <div class="result-grid">
+              <div><span data-i18n="game.safety">安全</span><strong id="result-safety">40 / 40</strong></div><div><span data-i18n="game.observation">观察</span><strong id="result-observation">30 / 30</strong></div>
+              <div><span data-i18n="game.efficiency">效率</span><strong id="result-efficiency">20 / 20</strong></div><div><span data-i18n="game.smooth">平稳</span><strong id="result-smooth">10 / 10</strong></div>
+            </div>
+            <div id="result-advice" class="mini-lesson"><span data-i18n="result.adviceLabel">下一次可以更好</span><p id="result-advice-text"></p></div>
+            <div class="result-actions"><button id="new-game-button" class="primary-button" type="button"><span data-i18n="scene.revealedVehicle.newGame">再练三组遮挡显露</span><span aria-hidden="true">→</span></button><button id="same-game-button" class="text-button" type="button" data-i18n="game.sameGame">重玩同局</button></div>
+            <button id="result-role-button" class="text-button" type="button" data-i18n="scene.revealedVehicle.roleReplayResult">复盘本局视野与道路全景</button>
+          </div>
+        </div>
+
+        <div class="controls-slot">
+          <div id="demo-screen" class="demo-overlay" hidden>
+            <div class="demo-caption"><span class="demo-badge" data-i18n="game.demoBadge">正确示范</span><strong id="demo-step">先识别线索，提前控速</strong><small id="demo-substep">真实模拟使用相同车辆、遮挡和制动规则</small></div>
+            <div class="demo-actions"><button id="replay-view-button" class="text-button" type="button" data-i18n="scene.revealedVehicle.replay.showOverview" hidden>查看道路教学全景</button><button id="skip-demo-button" class="text-button" type="button" data-i18n="game.skipDemo">跳过示范</button></div>
+          </div>
+        </div>
+        <div class="touch-controls" data-i18n-aria="game.controls" aria-label="驾驶控制">
+          <div class="pedal-controls">
+            <button class="control-button throttle" type="button" data-control="throttle" data-i18n-aria="game.accelerate" aria-label="加速"><span aria-hidden="true">▲</span><small data-i18n="game.accelerate">加速</small></button>
+            <button class="control-button brake" type="button" data-control="brake" data-i18n-aria="game.brake" aria-label="制动"><span aria-hidden="true">▼</span><small data-i18n="game.brake">制动</small></button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="side-panel">
+        <section class="mission-card">
+          <p class="eyebrow" data-i18n="game.missionEyebrow">本次训练</p>
+          <h2><span data-i18n="scene.revealedVehicle.missionTitleA">不是跟着前车绕，</span><br><span data-i18n="scene.revealedVehicle.missionTitleB">而是先恢复自己的视野。</span></h2>
+          <p data-i18n="scene.revealedVehicle.missionText">每局包含提前显露、较晚显露和畅通对照。静止车从计划开始就存在，可见性由你的眼点和移动前车的真实遮挡决定；危险段在原车道停稳即完成。</p>
+          <div class="risk-key"><span class="risk-swatch"></span><div><strong data-i18n="scene.revealedVehicle.riskZone">动态遮挡与停车余量</strong><small data-i18n="scene.revealedVehicle.riskDescription">转向灯和横向移动是线索，不是跟随加速的提示</small></div></div>
+        </section>
+        <section class="score-card">
+          <div class="section-heading"><h3 data-i18n="game.rating">驾驶评价</h3><span data-i18n="game.points100">100 分制</span></div>
+          <div class="score-row"><span><i class="dot safety"></i><em data-i18n="game.safety">安全</em></span><strong>40</strong><small data-i18n="game.safetyRule">不进入危险冲突</small></div>
+          <div class="score-row"><span><i class="dot observe"></i><em data-i18n="game.observation">观察</em></span><strong>30</strong><small data-i18n="scene.revealedVehicle.observationRule">接近准备 3 + 提前响应 3 + 匹配行动 4</small></div>
+          <div class="score-row"><span><i class="dot efficient"></i><em data-i18n="game.efficiency">效率</em></span><strong>20</strong><small data-i18n="scene.revealedVehicle.efficiencyRule">必要控速与停车不扣分，畅通后及时继续</small></div>
+          <div class="score-row"><span><i class="dot smooth"></i><em data-i18n="game.smooth">平稳</em></span><strong>10</strong><small data-i18n="scene.revealedVehicle.smoothRule">避免跟随加速和可预防急刹</small></div>
+        </section>
+        <section class="live-card">
+          <div class="section-heading"><h3 data-i18n="game.live">本次表现</h3><span id="live-seed">#0000</span></div>
+          <div class="live-stats"><div><strong id="slow-count">0</strong><span data-i18n="scene.revealedVehicle.live.early">提前响应</span></div><div><strong id="brake-count">0</strong><span data-i18n="game.hardBrakes">急刹</span></div><div><strong id="passed-count">0</strong><span data-i18n="scene.revealedVehicle.live.safe">安全事件</span></div></div>
+          <div class="smooth-meter"><span id="smooth-meter-fill"></span></div><small id="smooth-caption">平稳驾驶 10 / 10</small>
+        </section>
+        <p class="side-note"><span aria-hidden="true">◇</span><em data-i18n="scene.revealedVehicle.sideNote">前车变道也可能只是正常变道。统一先保留余量，再依据真实视野决定停车或继续。</em></p>
+      </aside>
+    </main>
+    <footer data-i18n="common.footer">防御性驾驶科普 Demo · 具体交通规则请以当地法规为准</footer>
+  </div>
+  <noscript><span data-i18n="game.noscript">请启用 JavaScript 后进行安全演练。</span><br>Enable JavaScript to play. <a href="games.html">游戏列表 / All games</a></noscript>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101c26">
+  <meta name="description" content="人行横道上的突然加速与折返：提前停车让行，不预测行人路线，等斑马线完全清空再起步的防御性驾驶小游戏。" data-i18n-content="scene.turnback.description">
+  <title data-i18n="scene.turnback.documentTitle">人行横道上的突然加速与折返｜防御性驾驶训练</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .turnback-sign { display: block; width: 126px; height: 72px; background: #26383e; overflow: hidden; }
+    .turnback-sign::before { content: ""; position: absolute; left: 0; right: 0; top: 20px; height: 19px; background: repeating-linear-gradient(90deg, #e3e3cd 0 13px, transparent 13px 23px); }
+    .turnback-sign::after { content: ""; position: absolute; left: 17px; right: 17px; top: 45px; height: 3px; background: #f0ead2; }
+    .turnback-sign .turnback-person { position: absolute; z-index: 2; left: 53px; top: 18px; width: 8px; height: 17px; background: var(--coral); box-shadow: 3px 3px 0 #101c2688; }
+    .turnback-sign .turnback-person::before { content: ""; position: absolute; left: 0; top: -8px; width: 8px; height: 7px; background: #efb489; }
+    .turnback-sign .turnback-person::after { content: ""; position: absolute; left: -5px; top: 4px; width: 18px; height: 4px; background: var(--coral); }
+    .turnback-sign .turnback-car { position: absolute; z-index: 2; left: 49px; bottom: 0; width: 25px; height: 23px; background: var(--mint); border: 3px solid #142832; }
+    body[data-scene="crosswalk-turnback"] .touch-controls { grid-template-columns: 1fr; }
+    body[data-scene="crosswalk-turnback"] .pedal-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    body[data-scene="crosswalk-turnback"] .controls-slot { position: relative; min-height: 0; margin-top: 0; }
+    body[data-scene="crosswalk-turnback"] .controls-slot:has(.demo-overlay:not([hidden])) { min-height: 88px; margin-top: 12px; }
+    body[data-scene="crosswalk-turnback"] .controls-slot .demo-overlay { inset: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; background: #142a34; border: 1px solid #3f625a; }
+    body[data-scene="crosswalk-turnback"] .controls-slot .demo-overlay[hidden] { display: none; }
+    body[data-scene="crosswalk-turnback"] .demo-caption { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; }
+    body[data-scene="crosswalk-turnback"] .demo-caption strong { font-size: 12px; }
+    body[data-scene="crosswalk-turnback"] .demo-caption small { font-size: 10px; line-height: 1.45; }
+    @media (max-width: 370px) { .turnback-sign { transform: scale(.88); transform-origin: center; } }
+  </style>
+  <script defer src="js/i18n.js"></script>
+  <script defer src="js/model.js"></script>
+  <script defer src="js/draw.js"></script>
+  <script defer src="js/scoring.js"></script>
+  <script defer src="js/input.js"></script>
+  <script defer src="js/scenes/crosswalk-turnback.js"></script>
+  <script defer src="js/main.js"></script>
+</head>
+<body data-scene="crosswalk-turnback">
+  <div class="page-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html" data-language-link data-i18n-aria="common.homeAria">
+        <span class="brand-mark" aria-hidden="true">07</span>
+        <span><strong class="brand-full" data-i18n="scene.turnback.brand">人行横道上的突然加速与折返</strong><strong class="brand-compact" data-i18n="scene.turnback.brandShort">行人加速与折返</strong><small data-i18n="game.brandSub">防御性驾驶演练</small></span>
+      </a>
+      <div class="topbar-right">
+        <span class="episode" data-i18n="scene.turnback.episode">训练 07 / 行人变化</span>
+        <a class="home-link" href="games.html" data-language-link data-i18n-aria="common.homeAria"><span aria-hidden="true">←</span><span data-i18n="common.home">游戏列表</span></a>
+        <button class="language-toggle" type="button" data-language-toggle>EN</button>
+        <button id="pause-button" class="icon-button" type="button" data-i18n-aria="game.pause" data-i18n-title="game.pauseTitle" aria-label="暂停游戏" title="暂停（P）" disabled>Ⅱ</button>
+      </div>
+    </header>
+
+    <main class="game-layout">
+      <section class="game-column" data-i18n-aria="game.region" aria-label="游戏区域">
+        <div id="game-frame" class="game-frame">
+          <canvas id="game-canvas" width="360" height="640" role="img" data-i18n-aria="scene.turnback.canvasAria" aria-label="俯视角单车道道路。三组人行横道上的行人可能正常通过、突然加速或折返，提前停稳并等待完全清空。">
+            <span data-i18n="game.canvasFallback">你的浏览器不支持 Canvas，请使用新版浏览器。</span>
+          </canvas>
+          <div class="hud" aria-live="polite">
+            <div class="hud-top"><span id="progress-label" class="hud-chip">人行横道 0 / 3</span><span id="timer-label" class="hud-chip">00:00</span></div>
+            <div id="coach-bubble" class="coach-bubble"><span class="coach-icon" aria-hidden="true">!</span><span id="coach-text">畅通路段保持 40–55 km/h</span></div>
+            <div class="speed-card"><div><span id="speed-value">0</span><small>km/h</small></div><span id="speed-status" class="speed-status">准备出发</span></div>
+          </div>
+          <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+          <div id="start-screen" class="screen-overlay">
+            <div class="pixel-sign turnback-sign" aria-hidden="true"><span class="turnback-person"></span><span class="turnback-car"></span></div>
+            <p class="eyebrow" data-i18n="scene.turnback.startEyebrow">防御性驾驶演练 · 07</p>
+            <h1><span data-i18n="scene.turnback.startTitleA">看得见行人，</span><br><span data-i18n="scene.turnback.startTitleB">也别猜下一步</span></h1>
+            <p class="lead"><span data-i18n="scene.turnback.startLeadA">行人可能突然加速，也可能中途折返。</span><br><span data-i18n="scene.turnback.startLeadB">先停车让行，等完全清空再起步。</span></p>
+            <div class="lesson-strip">
+              <span><b>01</b><em data-i18n="scene.turnback.lesson1">提前减速，停止线前停稳</em></span>
+              <span><b>02</b><em data-i18n="scene.turnback.lesson2">不预测路线，不蠕行抢行</em></span>
+              <span><b>03</b><em data-i18n="scene.turnback.lesson3">完全清空后平稳起步</em></span>
+            </div>
+            <button id="start-button" class="primary-button" type="button"><span data-i18n="game.startButton">开始安全演练</span><span aria-hidden="true">→</span></button>
+            <p class="key-hint" data-i18n="scene.turnback.keyHint">键盘 W / ↑ 加速 · S / ↓ 制动 · 本关不变道</p>
+          </div>
+
+          <div id="pause-screen" class="screen-overlay compact" hidden>
+            <p class="eyebrow" data-i18n="game.paused">演练已暂停</p><h2 data-i18n="game.pauseTitleHeading">休息一下</h2><p class="lead" data-i18n="game.pauseText">暂停时间不会计入成绩。</p>
+            <button id="resume-button" class="primary-button" type="button"><span data-i18n="game.resumeButton">继续驾驶</span><span aria-hidden="true">→</span></button>
+            <button id="pause-restart-button" class="text-button" type="button" data-i18n="game.restart">重新开始本局</button>
+          </div>
+
+          <div id="failure-screen" class="screen-overlay compact failure-screen" hidden>
+            <div class="warning-icon" aria-hidden="true">!</div><p class="eyebrow" data-i18n="game.failureEyebrow">碰撞前 · 演练暂停</p>
+            <h2><span data-i18n="scene.turnback.failureTitleA">不要预测行人，</span><br><span data-i18n="scene.turnback.failureTitleB">要留出停车余地。</span></h2>
+            <p id="failure-reason" class="lead">行人仍在通过时继续向前，剩余距离已经不足以安全停车。</p>
+            <div class="mini-lesson"><span data-i18n="game.correctAction">正确做法</span><p data-i18n="scene.turnback.failureLesson">看到有人通过就提前在停止线前停稳。即使行人已经走过你的车道或开始折返，也继续保持停车，等整个人行横道完全清空。</p></div>
+            <button id="demo-button" class="primary-button" type="button"><span data-i18n="game.watchDemo">看看正确示范</span><span aria-hidden="true">▶</span></button>
+            <button id="retry-button" class="text-button" type="button" data-i18n="scene.turnback.skipDemoRetry">跳过示范，从这条人行横道前重试</button>
+          </div>
+
+          <div id="result-screen" class="screen-overlay result-screen" hidden>
+            <p id="result-kicker" class="eyebrow">演练完成</p><div class="grade-medal"><span id="result-grade">A</span><small data-i18n="game.gradeCaption">安全评价</small></div>
+            <h2 id="result-title">平稳防御</h2><p id="result-summary" class="lead">你没有猜测行人的下一步。</p>
+            <div class="result-score"><strong id="result-total">92</strong><span>/ 100</span></div>
+            <div class="result-grid">
+              <div><span data-i18n="game.safety">安全</span><strong id="result-safety">40 / 40</strong></div><div><span data-i18n="game.observation">观察</span><strong id="result-observation">30 / 30</strong></div>
+              <div><span data-i18n="game.efficiency">效率</span><strong id="result-efficiency">18 / 20</strong></div><div><span data-i18n="game.smooth">平稳</span><strong id="result-smooth">10 / 10</strong></div>
+            </div>
+            <div id="result-advice" class="mini-lesson"><span data-i18n="result.adviceLabel">下一次可以更好</span><p id="result-advice-text"></p></div>
+            <div class="result-actions"><button id="new-game-button" class="primary-button" type="button"><span data-i18n="scene.turnback.newGame">再练一组人行横道</span><span aria-hidden="true">→</span></button><button id="same-game-button" class="text-button" type="button" data-i18n="game.sameGame">重玩同局</button></div>
+          </div>
+        </div>
+
+        <div class="controls-slot">
+          <div id="demo-screen" class="demo-overlay" hidden>
+            <div class="demo-caption"><span class="demo-badge" data-i18n="game.demoBadge">正确示范</span><strong id="demo-step">提前减速，停止线前停稳</strong><small id="demo-substep">正常、加速或折返，都持续等待完全清空</small></div>
+            <button id="skip-demo-button" class="text-button" type="button" data-i18n="game.skipDemo">跳过示范</button>
+          </div>
+        </div>
+        <div class="touch-controls" data-i18n-aria="game.controls" aria-label="驾驶控制">
+          <div class="pedal-controls">
+            <button class="control-button throttle" type="button" data-control="throttle" data-i18n-aria="game.accelerate" aria-label="加速"><span aria-hidden="true">▲</span><small data-i18n="game.accelerate">加速</small></button>
+            <button class="control-button brake" type="button" data-control="brake" data-i18n-aria="game.brake" aria-label="制动"><span aria-hidden="true">▼</span><small data-i18n="game.brake">制动</small></button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="side-panel">
+        <section class="mission-card">
+          <p class="eyebrow" data-i18n="game.missionEyebrow">本次训练</p>
+          <h2><span data-i18n="scene.turnback.missionTitleA">不是猜行人怎么走，</span><br><span data-i18n="scene.turnback.missionTitleB">而是始终让行人先走。</span></h2>
+          <p data-i18n="scene.turnback.missionText">每局包含正常通过、突然加速和中途折返。有人通过时必须提前停车让行，持续蠕行、从身后抢行或没等清空就起步都不能获得高评价。</p>
+          <div class="risk-key"><span class="risk-swatch"></span><div><strong data-i18n="scene.turnback.riskZone">让行冲突区</strong><small data-i18n="scene.turnback.riskDescription">前 35 米进入，绿色区域是停车参考</small></div></div>
+        </section>
+        <section class="score-card">
+          <div class="section-heading"><h3 data-i18n="game.rating">驾驶评价</h3><span data-i18n="game.points100">100 分制</span></div>
+          <div class="score-row"><span><i class="dot safety"></i><em data-i18n="game.safety">安全</em></span><strong>40</strong><small data-i18n="game.safetyRule">不进入危险冲突</small></div>
+          <div class="score-row"><span><i class="dot observe"></i><em data-i18n="game.observation">观察</em></span><strong>30</strong><small data-i18n="scene.turnback.observationRule">提前减速 3 + 正确停稳 4 + 等待清空 3</small></div>
+          <div class="score-row"><span><i class="dot efficient"></i><em data-i18n="game.efficiency">效率</em></span><strong>20</strong><small data-i18n="scene.turnback.efficiencyRule">必要等待不扣分，清空后及时提速</small></div>
+          <div class="score-row"><span><i class="dot smooth"></i><em data-i18n="game.smooth">平稳</em></span><strong>10</strong><small data-i18n="game.smoothRule">避免不必要的急刹</small></div>
+        </section>
+        <section class="live-card">
+          <div class="section-heading"><h3 data-i18n="game.live">本次表现</h3><span id="live-seed">#0000</span></div>
+          <div class="live-stats"><div><strong id="slow-count">0</strong><span data-i18n="game.earlySlow">提前减速</span></div><div><strong id="brake-count">0</strong><span data-i18n="game.hardBrakes">急刹</span></div><div><strong id="passed-count">0</strong><span data-i18n="game.cleanPasses">安全通过</span></div></div>
+          <div class="smooth-meter"><span id="smooth-meter-fill"></span></div><small id="smooth-caption">平稳驾驶 10 / 10</small>
+        </section>
+        <p class="side-note"><span aria-hidden="true">◇</span><em data-i18n="scene.turnback.sideNote">行为顺序和变化位置每局不同，防御动作不变：先停稳，再等清空。</em></p>
+      </aside>
+    </main>
+    <footer data-i18n="common.footer">防御性驾驶科普 Demo · 具体交通规则请以当地法规为准</footer>
+  </div>
+  <noscript><span data-i18n="game.noscript">请启用 JavaScript 后进行安全演练。</span><br>Enable JavaScript to play. <a href="games.html">游戏列表 / All games</a></noscript>
+</body>
+</html>

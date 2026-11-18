@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101c26">
+  <link rel="icon" href="data:,">
+  <meta name="description" content="平安街区：通过俯视角像素小游戏，练习提前观察、主动控速和预留空间。" data-i18n-content="home.description">
+  <title data-i18n="home.documentTitle">平安街区｜防御性驾驶小游戏</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="home.css">
+  <script defer src="js/i18n.js"></script>
+  <script defer src="js/catalog.js"></script>
+  <script defer src="js/home.js"></script>
+</head>
+<body class="home-page">
+  <div class="page-shell home-shell">
+    <header class="topbar home-topbar">
+      <a class="brand" href="index.html" data-language-link data-i18n-aria="common.homeAria" aria-label="返回游戏列表">
+        <span class="brand-mark home-brand-mark" aria-hidden="true"><span></span></span>
+        <span><strong data-i18n="home.brand">平安街区</strong><small data-i18n="home.brandSub">防御性驾驶游戏实验室</small></span>
+      </a>
+      <div class="topbar-right">
+        <span class="home-series-index" aria-hidden="true">PIXEL ROAD SERIES · 01</span>
+        <a class="home-list-link" href="games.html" data-language-link data-i18n="home.quickList">游戏目录</a>
+        <button class="language-toggle home-language-toggle" type="button" data-language-toggle aria-label="Switch to English" title="Switch to English">EN</button>
+      </div>
+    </header>
+
+    <main class="home-main">
+      <section class="home-hero" aria-labelledby="home-hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow" data-i18n="home.eyebrow">DEFENSIVE DRIVING · PLAY &amp; LEARN</p>
+          <h1 id="home-hero-title"><span data-i18n="home.heroTitleA">危险出现之前，</span><span data-i18n="home.heroTitleB">你已经做好准备。</span></h1>
+          <p class="hero-lead" data-i18n="home.heroText">不是拼反应，而是练习观察、控速和留出空间。用一局短游戏，养成真正有用的防御驾驶习惯。</p>
+          <ul class="principle-list">
+            <li><span class="principle-icon principle-observe" aria-hidden="true"><i></i></span><span data-i18n="home.principleObserve">提前观察</span></li>
+            <li><span class="principle-icon principle-speed" aria-hidden="true"><i></i></span><span data-i18n="home.principleSpeed">主动控速</span></li>
+            <li><span class="principle-icon principle-space" aria-hidden="true"><i></i></span><span data-i18n="home.principleSpace">预留空间</span></li>
+          </ul>
+          <a class="hero-cta" href="#catalog"><span data-i18n="home.catalogTitle">开始安全演练</span><span aria-hidden="true">↓</span></a>
+        </div>
+
+        <div class="hero-visual" aria-hidden="true">
+          <div class="hero-scene">
+            <div class="scene-topline"><span>SAFE STREETS</span><span>DRILL / 01</span></div>
+            <div class="scene-city">
+              <i class="building-a"></i><i class="building-b"></i><i class="building-c"></i><i class="building-d"></i>
+            </div>
+            <div class="scene-road">
+              <span class="scene-lane scene-lane-a"></span>
+              <span class="scene-lane scene-lane-b"></span>
+              <span class="scene-zebra"></span>
+              <span class="scene-scan"></span>
+              <span class="scene-bus"><i></i><i></i><i></i></span>
+              <span class="scene-car"><i></i></span>
+              <span class="scene-person"><i></i></span>
+            </div>
+            <div class="scene-caption"><span>01</span><i></i><span>OBSERVE · SLOW · SPACE</span></div>
+          </div>
+          <span class="hero-corner-pixel pixel-one"></span>
+          <span class="hero-corner-pixel pixel-two"></span>
+        </div>
+      </section>
+
+      <section id="catalog" class="home-catalog" aria-labelledby="catalog-title">
+        <div class="catalog-heading">
+          <div>
+            <p class="eyebrow" data-i18n="home.catalogEyebrow">选择一个交通场景</p>
+            <h2 id="catalog-title" data-i18n="home.catalogTitle">开始安全演练</h2>
+            <p data-i18n="home.catalogText">每个场景都是一次短局挑战，安全与平稳比速度更重要。</p>
+          </div>
+          <span class="catalog-count" aria-hidden="true">01—18</span>
+        </div>
+        <div id="catalog-grid" class="catalog-grid"></div>
+      </section>
+
+      <section class="home-more" aria-labelledby="home-more-title">
+        <span class="more-pixel" aria-hidden="true"><i></i><i></i><i></i></span>
+        <div><h2 id="home-more-title" data-i18n="home.more">更多场景正在设计中</h2><p data-i18n="home.moreText">从一个盲区开始，逐步学会在各种道路环境中给自己留一条退路。</p></div>
+        <span class="more-index" aria-hidden="true">NEXT →</span>
+      </section>
+    </main>
+
+    <footer class="home-footer">
+      <p data-i18n="home.note">本系列用于防御性驾驶科普，不替代当地交通法规或正式驾驶培训。</p>
+      <span data-i18n="common.footer">防御性驾驶科普 Demo · 具体交通规则请以当地法规为准</span>
+    </footer>
+  </div>
+  <noscript><p>请启用 JavaScript 查看游戏列表。/ Enable JavaScript to view the game catalog.</p><p><a href="bus-ghost.html">直接开始游戏 / Play Bus Blind Spot</a></p></noscript>
+</body>
+</html>

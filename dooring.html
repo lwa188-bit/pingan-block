@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101c26">
+  <meta name="description" content="停靠车辆突然开门（“开门杀”）：从乘客、骑行者和后方驾驶员三个视角，练习观察、避开汽车车门区和预留安全空间。" data-i18n-content="scene.dooring.description">
+  <title data-i18n="scene.dooring.documentTitle">停靠车辆突然开门（“开门杀”）｜三视角防御性安全演练</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .dooring-sign { display: block; width: 126px; height: 72px; background: #26383e; overflow: hidden; }
+    .dooring-sign .dooring-car { position: absolute; right: 16px; top: 10px; width: 31px; height: 51px; background: #d5b757; border: 3px solid #142832; }
+    .dooring-sign .dooring-car::before { content: ""; position: absolute; left: 4px; right: 4px; top: 8px; height: 12px; background: #29474d; }
+    .dooring-sign .dooring-door { position: absolute; z-index: 2; right: 43px; top: 14px; width: 39px; height: 5px; background: var(--yellow); transform: rotate(-24deg); transform-origin: right center; }
+    .dooring-sign .dooring-bike { position: absolute; left: 36px; top: 34px; width: 5px; height: 25px; background: #14232b; }
+    .dooring-sign .dooring-bike::before { content: ""; position: absolute; left: -5px; top: 4px; width: 15px; height: 9px; background: var(--coral); }
+    .dooring-sign .dooring-bike::after { content: ""; position: absolute; left: 0; top: -5px; width: 6px; height: 6px; background: #efb489; }
+    body[data-scene="dooring"] .control-button[hidden] { display: none; }
+    body[data-scene="dooring"] .steering-controls:has([data-control="right"]:not([hidden])) { grid-template-columns: 1fr 1fr; }
+    body[data-scene="dooring"] .control-button small { font-size: 10px; white-space: nowrap; }
+    body[data-scene="dooring"] .controls-slot { position: relative; min-height: 0; margin-top: 0; }
+    body[data-scene="dooring"] .controls-slot:has(.demo-overlay:not([hidden])) { min-height: 88px; margin-top: 12px; }
+    body[data-scene="dooring"] .controls-slot .demo-overlay { inset: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; background: #142a34; border: 1px solid #3f625a; }
+    body[data-scene="dooring"] .controls-slot .demo-overlay[hidden] { display: none; }
+    body[data-scene="dooring"] .demo-caption { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; }
+    body[data-scene="dooring"] .demo-caption strong { font-size: 12px; }
+    body[data-scene="dooring"] .demo-caption small { font-size: 10px; line-height: 1.45; }
+    @media (max-width: 370px) { .dooring-sign { transform: scale(.88); transform-origin: center; } }
+  </style>
+  <script defer src="js/i18n.js"></script>
+  <script defer src="js/model.js"></script>
+  <script defer src="js/draw.js"></script>
+  <script defer src="js/scoring.js"></script>
+  <script defer src="js/input.js"></script>
+  <script defer src="js/scenes/dooring.js"></script>
+  <script defer src="js/main.js"></script>
+</head>
+<body data-scene="dooring">
+  <div class="page-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html" data-language-link data-i18n-aria="common.homeAria">
+        <span class="brand-mark" aria-hidden="true">08</span>
+        <span><strong class="brand-full" data-i18n="scene.dooring.brand">停靠车辆突然开门（“开门杀”）</strong><strong class="brand-compact" data-i18n="scene.dooring.brandShort">开门杀</strong><small data-i18n="game.brandSub">防御性驾驶演练</small></span>
+      </a>
+      <div class="topbar-right">
+        <span class="episode" data-i18n="scene.dooring.episode">训练 08 / 停靠车辆突然开门</span>
+        <a class="home-link" href="games.html" data-language-link data-i18n-aria="common.homeAria"><span aria-hidden="true">←</span><span data-i18n="common.home">游戏列表</span></a>
+        <button class="language-toggle" type="button" data-language-toggle>EN</button>
+        <button id="pause-button" class="icon-button" type="button" data-i18n-aria="game.pause" data-i18n-title="game.pauseTitle" aria-label="暂停游戏" title="暂停（P）" disabled>Ⅱ</button>
+      </div>
+    </header>
+
+    <main class="game-layout">
+      <section class="game-column" data-i18n-aria="game.region" aria-label="游戏区域">
+        <div id="game-frame" class="game-frame">
+          <canvas id="game-canvas" width="360" height="640" role="img" data-i18n-aria="scene.dooring.canvasAria" aria-label="同一开门事件分别从乘客、骑行者和后方驾驶员视角重演。">
+            <span data-i18n="game.canvasFallback">你的浏览器不支持 Canvas，请使用新版浏览器。</span>
+          </canvas>
+          <div class="hud" aria-live="polite">
+            <div class="hud-top"><span id="progress-label" class="hud-chip">第 1 / 3 幕 · 乘客</span><span id="timer-label" class="hud-chip">00:00</span></div>
+            <div id="coach-bubble" class="coach-bubble"><span class="coach-icon" aria-hidden="true">!</span><span id="coach-text">先回头观察左后方</span></div>
+            <div class="speed-card"><div><span id="speed-value">0</span><small>km/h</small></div><span id="speed-status" class="speed-status">车内准备</span></div>
+          </div>
+          <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+          <div id="start-screen" class="screen-overlay">
+            <div class="pixel-sign dooring-sign" aria-hidden="true"><span class="dooring-car"></span><span class="dooring-door"></span><span class="dooring-bike"></span></div>
+            <p class="eyebrow" data-i18n="scene.dooring.startEyebrow">三视角安全演练 · 08</p>
+            <h1><span data-i18n="scene.dooring.startTitleA">一扇车门，</span><br><span data-i18n="scene.dooring.startTitleB">三个安全选择</span></h1>
+            <p class="lead"><span data-i18n="scene.dooring.startLeadA">同一次开门，分别扮演乘客、骑行者和后车。</span><br><span data-i18n="scene.dooring.startLeadB">看清再开、避开汽车车门区、留足余地。</span></p>
+            <div class="lesson-strip">
+              <span><b>01</b><em data-i18n="scene.dooring.lesson1">乘客：回头观察，微开确认</em></span>
+              <span><b>02</b><em data-i18n="scene.dooring.lesson2">骑行者：能安全绕行才绕行</em></span>
+              <span><b>03</b><em data-i18n="scene.dooring.lesson3">后车：不贴骑、不抢行</em></span>
+            </div>
+            <button id="start-button" class="primary-button" type="button"><span data-i18n="game.startButton">开始安全演练</span><span aria-hidden="true">→</span></button>
+            <p class="key-hint" data-i18n="scene.dooring.keyHint">乘客 A / ← 观察 · S 微开 · W 远手开门；驾驶幕使用 W S A D</p>
+          </div>
+
+          <div id="pause-screen" class="screen-overlay compact" hidden>
+            <p class="eyebrow" data-i18n="game.paused">演练已暂停</p><h2 data-i18n="game.pauseTitleHeading">休息一下</h2><p class="lead" data-i18n="game.pauseText">暂停时间不会计入成绩。</p>
+            <button id="resume-button" class="primary-button" type="button"><span data-i18n="game.resumeButton">继续驾驶</span><span aria-hidden="true">→</span></button>
+            <button id="pause-restart-button" class="text-button" type="button" data-i18n="game.restart">重新开始本局</button>
+          </div>
+
+          <div id="failure-screen" class="screen-overlay compact failure-screen" hidden>
+            <div class="warning-icon" aria-hidden="true">!</div><p class="eyebrow" data-i18n="game.failureEyebrow">碰撞前 · 演练暂停</p>
+            <h2><span data-i18n="scene.dooring.failureTitleA">安全不是碰运气，</span><br><span data-i18n="scene.dooring.failureTitleB">而是先留余地。</span></h2>
+            <p id="failure-reason" class="lead">先观察并留出空间，不依赖最后一刻躲避。</p>
+            <div class="mini-lesson"><span data-i18n="game.correctAction">正确做法</span><p data-i18n="scene.dooring.failureLesson">乘客先回头并微开确认；骑行者提前减速，左侧有来车时停车等待；后车保持足够空间。</p></div>
+            <button id="demo-button" class="primary-button" type="button"><span data-i18n="game.watchDemo">看看正确示范</span><span aria-hidden="true">▶</span></button>
+            <button id="retry-button" class="text-button" type="button" data-i18n="scene.dooring.skipDemoRetry">跳过示范，重试当前角色</button>
+          </div>
+
+          <div id="result-screen" class="screen-overlay result-screen" hidden>
+            <p id="result-kicker" class="eyebrow">演练完成</p><div class="grade-medal"><span id="result-grade">A</span><small data-i18n="game.gradeCaption">安全评价</small></div>
+            <h2 id="result-title">平稳防御</h2><p id="result-summary" class="lead">三个角色都用观察和空间化解了危险。</p>
+            <div class="result-score"><strong id="result-total">92</strong><span>/ 100</span></div>
+            <div class="result-grid">
+              <div><span data-i18n="game.safety">安全</span><strong id="result-safety">40 / 40</strong></div><div><span data-i18n="game.observation">观察</span><strong id="result-observation">30 / 30</strong></div><div><span data-i18n="game.efficiency">效率</span><strong id="result-efficiency">18 / 20</strong></div><div><span data-i18n="game.smooth">平稳</span><strong id="result-smooth">10 / 10</strong></div>
+            </div>
+            <div id="result-advice" class="mini-lesson"><span data-i18n="result.adviceLabel">下一次可以更好</span><p id="result-advice-text"></p></div>
+            <div class="result-actions"><button id="new-game-button" class="primary-button" type="button"><span data-i18n="scene.dooring.newGame">换一组开门情境</span><span aria-hidden="true">→</span></button><button id="same-game-button" class="text-button" type="button" data-i18n="game.sameGame">重玩同局</button></div>
+          </div>
+        </div>
+
+        <div class="controls-slot">
+          <div id="demo-screen" class="demo-overlay" hidden>
+            <div class="demo-caption"><span class="demo-badge" data-i18n="game.demoBadge">正确示范</span><strong id="demo-step">持续回头，等骑行者通过</strong><small id="demo-substep">远手开门不能替代观察</small></div>
+            <button id="skip-demo-button" class="text-button" type="button" data-i18n="game.skipDemo">跳过示范</button>
+          </div>
+        </div>
+        <div class="touch-controls" data-i18n-aria="game.controls" aria-label="场景操作">
+          <div class="steering-controls">
+            <button class="control-button" type="button" data-control="left" aria-label="回头观察"><span aria-hidden="true">◉</span><small>回头观察</small></button>
+            <button class="control-button" type="button" data-control="right" aria-label="向右微调" hidden><span aria-hidden="true">→</span><small>右移</small></button>
+          </div>
+          <div class="pedal-controls">
+            <button class="control-button throttle" type="button" data-control="throttle" aria-label="远手开门"><span aria-hidden="true">↗</span><small>远手开门</small></button>
+            <button class="control-button brake" type="button" data-control="brake" aria-label="微开确认"><span aria-hidden="true">▱</span><small>微开确认</small></button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="side-panel">
+        <section class="mission-card">
+          <p class="eyebrow" data-i18n="game.missionEyebrow">本次训练</p>
+          <h2><span data-i18n="scene.dooring.missionTitleA">同一场开门，</span><br><span data-i18n="scene.dooring.missionTitleB">三种防御责任。</span></h2>
+          <p data-i18n="scene.dooring.missionText">三幕是独立教学重演。远手开门帮助转身，但不能代替观察；向左绕行也不是骑行者的固定答案。</p>
+          <div class="risk-key"><span class="risk-swatch"></span><div><strong data-i18n="scene.dooring.riskZone">车门动态危险区</strong><small data-i18n="scene.dooring.riskDescription">车门从铰链连续展开，碰撞范围随角度变化</small></div></div>
+        </section>
+        <section class="score-card">
+          <div class="section-heading"><h3 data-i18n="game.rating">驾驶评价</h3><span data-i18n="game.points100">100 分制</span></div>
+          <div class="score-row"><span><i class="dot safety"></i><em data-i18n="game.safety">安全</em></span><strong>40</strong><small data-i18n="game.safetyRule">不进入危险冲突</small></div>
+          <div class="score-row"><span><i class="dot observe"></i><em data-i18n="game.observation">观察</em></span><strong>30</strong><small data-i18n="scene.dooring.observationRule">每幕 10 分：观察、正确动作与安全余量</small></div>
+          <div class="score-row"><span><i class="dot efficient"></i><em data-i18n="game.efficiency">效率</em></span><strong>20</strong><small data-i18n="scene.dooring.efficiencyRule">必要等待不扣分，危险解除后继续等待会扣分</small></div>
+          <div class="score-row"><span><i class="dot smooth"></i><em data-i18n="game.smooth">平稳</em></span><strong>10</strong><small data-i18n="game.smoothRule">避免不必要的急刹</small></div>
+        </section>
+        <section class="live-card">
+          <div class="section-heading"><h3 data-i18n="game.live">本次表现</h3><span id="live-seed">#0000</span></div>
+          <div class="live-stats"><div><strong id="slow-count">0</strong><span data-i18n="scene.dooring.live.observe">完成观察</span></div><div><strong id="brake-count">0</strong><span data-i18n="game.hardBrakes">急刹</span></div><div><strong id="passed-count">0</strong><span data-i18n="scene.dooring.live.safe">安全完成</span></div></div>
+          <div class="smooth-meter"><span id="smooth-meter-fill"></span></div><small id="smooth-caption">平稳驾驶 10 / 10</small>
+        </section>
+        <p class="side-note"><span aria-hidden="true">◇</span><em data-i18n="scene.dooring.sideNote">左侧有来车时，停车比强行向左绕行更安全。远手开门只是动作辅助，不是“免观察”技巧。</em></p>
+      </aside>
+    </main>
+    <footer data-i18n="common.footer">防御性驾驶科普 Demo · 具体交通规则请以当地法规为准</footer>
+  </div>
+  <noscript><span data-i18n="game.noscript">请启用 JavaScript 后进行安全演练。</span><br>Enable JavaScript to play. <a href="games.html">游戏列表 / All games</a></noscript>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>平安街区｜系列逻辑测试</title>
+  <style>
+    body { max-width: 850px; margin: 40px auto; padding: 0 20px; color: #e9f1e8; background: #101c26; font: 15px/1.6 system-ui, sans-serif; }
+    h1 { font-size: 24px; } #summary { padding: 12px; background: #203642; }
+    li { margin: 10px 0; } .pass { color: #80e0b1; } .fail { color: #ff7a66; }
+    small { color: #9bb0b5; } a { color: #80e0b1; }
+  </style>
+</head>
+<body>
+  <h1>游戏逻辑测试（01 公交鬼探头 / 02 斑马线遮挡 / 03 前车制动 / 04 车缝鬼探头 / 06 巷口盲区 / 07 行人变化 / 08 停靠车辆突然开门（“开门杀”） / 05 大货车右转与内轮差 / 09 倒车盲区 / 10 非机动车逆行与突然变道 / 11 绿灯路口与闯红灯车辆 / 12 无信号灯路口的交叉来车 / 13 黄灯决策 / 14 近距加塞与空间恢复 / 15 多车连锁制动 / 16 遮挡显露静止车 / 17 大车遮挡信号与路口 / 18 变道盲区 / 19 大车盲区）</h1>
+  <p id="summary">正在运行……</p>
+  <ol id="results"></ol>
+  <p><a href="index.html">← 返回游戏列表</a></p>
+  <script src="js/i18n.js"></script>
+  <script src="js/catalog.js"></script>
+  <script src="js/model.js"></script>
+  <script src="js/draw.js"></script>
+  <script src="js/scoring.js"></script>
+  <script src="js/simulation.js"></script>
+  <script src="js/scenes/crosswalk.js"></script>
+  <script src="js/scenes/braking.js"></script>
+  <script src="js/scenes/parked-cars.js"></script>
+  <script src="js/scenes/blind-junction.js"></script>
+  <script src="js/scenes/crosswalk-turnback.js"></script>
+  <script src="js/scenes/dooring.js"></script>
+  <script src="js/scenes/truck-inner-wheel.js"></script>
+  <script src="js/scenes/reversing-blind-spot.js"></script>
+  <script src="js/scenes/nonmotor-mix.js"></script>
+  <script src="js/scenes/red-light-runner.js"></script>
+  <script src="js/scenes/unsignalized-cross-traffic.js"></script>
+  <script src="js/scenes/yellow-light-decision.js"></script>
+  <script src="js/scenes/sudden-cut-in.js"></script>
+  <script src="js/scenes/multi-car-pileup.js"></script>
+  <script src="js/scenes/revealed-stopped-vehicle.js"></script>
+  <script src="js/scenes/obscured-signal-intersection.js"></script>
+  <script src="js/scenes/lane-change-blind-spot.js"></script>
+  <script src="js/scenes/large-vehicle-blind-zones.js"></script>
+  <script src="tests/cases.js"></script>
+  <script src="tests/crosswalk-cases.js"></script>
+  <script src="tests/braking-cases.js"></script>
+  <script src="tests/parked-cars-cases.js"></script>
+  <script src="tests/blind-junction-cases.js"></script>
+  <script src="tests/crosswalk-turnback-cases.js"></script>
+  <script src="tests/dooring-cases.js"></script>
+  <script src="tests/truck-inner-wheel-cases.js"></script>
+  <script src="tests/reversing-blind-spot-cases.js"></script>
+  <script src="tests/nonmotor-mix-cases.js"></script>
+  <script src="tests/red-light-runner-cases.js"></script>
+  <script src="tests/unsignalized-cross-traffic-cases.js"></script>
+  <script src="tests/yellow-light-decision-cases.js"></script>
+  <script src="tests/sudden-cut-in-cases.js"></script>
+  <script src="tests/multi-car-pileup-cases.js"></script>
+  <script src="tests/revealed-stopped-vehicle-cases.js"></script>
+  <script src="tests/obscured-signal-intersection-cases.js"></script>
+  <script src="tests/lane-change-blind-spot-cases.js"></script>
+  <script src="tests/large-vehicle-blind-zones-cases.js"></script>
+  <script>
+    const suites = [BusGameTests, CrosswalkTests, BrakingTests, ParkedCarsTests, BlindJunctionTests, CrosswalkTurnbackTests, DooringTests, TruckInnerWheelTests, ReversingBlindSpotTests, NonmotorMixTests, RedLightRunnerTests, UnsignalizedCrossTrafficTests, YellowLightDecisionTests, SuddenCutInTests, MultiCarPileupTests, RevealedStoppedVehicleTests, ObscuredSignalIntersectionTests, LaneChangeTests, LargeVehicleTests];
+    const report = suites.reduce(function (total, suite) {
+      const result = suite.run();
+      return {
+        passed: total.passed + result.passed,
+        failed: total.failed + result.failed,
+        results: total.results.concat(result.results)
+      };
+    }, { passed: 0, failed: 0, results: [] });
+    document.getElementById('summary').textContent = report.passed + ' 项通过，' + report.failed + ' 项失败。';
+    document.getElementById('results').innerHTML = report.results.map(function (result) {
+      return '<li class="' + (result.passed ? 'pass' : 'fail') + '">' + (result.passed ? '✓ ' : '✗ ') + result.name +
+        (result.error ? '<br><small>' + result.error + '</small>' : '') + '</li>';
+    }).join('');
+  </script>
+</body>
+</html>

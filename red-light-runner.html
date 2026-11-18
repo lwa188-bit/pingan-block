@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101c26">
+  <meta name="description" content="绿灯路口与闯红灯车辆：进入路口前扫视左右，识别高速接近且没有停车趋势的车辆，为他人的违法与失误预留空间。" data-i18n-content="scene.redLight.description">
+  <title data-i18n="scene.redLight.documentTitle">绿灯路口与闯红灯车辆｜防御性驾驶训练</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .runner-sign { display: block; width: 132px; height: 76px; background: #26383e; overflow: hidden; }
+    .runner-sign::before { content: ""; position: absolute; left: 0; right: 0; top: 27px; height: 27px; background: #3b484b; }
+    .runner-sign::after { content: ""; position: absolute; left: 57px; top: 0; bottom: 0; width: 27px; background: #3b484b; }
+    .runner-sign .signal-own { position: absolute; z-index: 3; right: 14px; bottom: 8px; width: 9px; height: 22px; background: #14232b; border-top: 5px solid #66403e; border-bottom: 5px solid var(--mint); }
+    .runner-sign .signal-cross { position: absolute; z-index: 3; left: 17px; top: 9px; width: 9px; height: 22px; background: #14232b; border-top: 5px solid #ff6459; border-bottom: 5px solid #315148; }
+    .runner-sign .runner-car { position: absolute; z-index: 4; left: 27px; top: 34px; width: 37px; height: 17px; background: #d7b957; border: 3px solid #142832; }
+    .runner-sign .runner-car::after { content: ""; position: absolute; left: 8px; top: 2px; width: 14px; height: 7px; background: #29474d; }
+    .runner-sign .own-car { position: absolute; z-index: 4; left: 64px; bottom: 5px; width: 17px; height: 29px; background: var(--coral); border: 3px solid #142832; }
+    .runner-sign .scan-line { position: absolute; z-index: 2; left: 36px; top: 15px; width: 64px; height: 50px; border: 2px dashed #80e0b177; }
+    body[data-scene="red-light-runner"] .controls-slot { min-height: 0; margin-top: 0; }
+    body[data-scene="red-light-runner"] .controls-slot:has(.demo-overlay:not([hidden])) { min-height: 88px; margin-top: 12px; }
+    body[data-scene="red-light-runner"] .controls-slot .demo-overlay { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: #142a34; border: 1px solid #3f625a; }
+    body[data-scene="red-light-runner"] .controls-slot .demo-caption { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; }
+    body[data-scene="red-light-runner"] .demo-caption strong { font-size: 12px; }
+    body[data-scene="red-light-runner"] .demo-caption small { font-size: 10px; line-height: 1.45; }
+    .view-controls { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 12px 0; }
+    .view-button { min-height: 48px; padding: 6px 4px; color: var(--ink-muted); background: #172d37; border: 1px solid #38505a; border-radius: 6px; font: inherit; font-size: 11px; line-height: 1.25; cursor: pointer; touch-action: manipulation; }
+    .view-button b { display: block; margin-bottom: 3px; color: #78929a; font-size: 9px; }
+    .view-button.active { color: #10241f; background: var(--mint); border-color: var(--mint); }
+    .view-button.active b { color: #315c50; }
+    body[data-scene="red-light-runner"] .touch-controls { grid-template-columns: 1fr; margin-top: 0; }
+    body[data-scene="red-light-runner"] .control-button { min-height: 64px; }
+    body[data-scene="red-light-runner"] .control-button small { font-size: 10px; white-space: nowrap; }
+    @media (min-width: 761px) {
+      body[data-scene="red-light-runner"] .game-column { max-width: clamp(290px, calc((100vh - 270px) * .5625), 430px); max-width: clamp(290px, calc((100dvh - 270px) * .5625), 430px); }
+    }
+    @media (min-width: 761px) and (max-height: 800px) {
+      body[data-scene="red-light-runner"] .game-column { max-width: clamp(270px, calc((100vh - 235px) * .5625), 430px); max-width: clamp(270px, calc((100dvh - 235px) * .5625), 430px); }
+      .view-controls { margin: 8px 0; }
+      .view-button { min-height: 44px; }
+      body[data-scene="red-light-runner"] .control-button { min-height: 58px; }
+    }
+    @media (min-width: 761px) and (min-height: 951px) {
+      body[data-scene="red-light-runner"] #start-screen h1 { font-size: 35px; letter-spacing: .02em; }
+      html[lang="en"] body[data-scene="red-light-runner"] #start-screen h1 { font-size: 28px; line-height: 1.14; }
+    }
+    @media (max-width: 760px) and (min-height: 760px) {
+      body[data-scene="red-light-runner"] .game-column { width: 100%; max-width: min(410px, calc((100dvh - 272px) * .5625)); min-width: 280px; }
+    }
+    @media (max-width: 370px) {
+      .runner-sign { transform: scale(.86); transform-origin: center; }
+      .view-button { min-height: 46px; font-size: 10px; }
+      body[data-scene="red-light-runner"] .control-button small { font-size: 9px; }
+    }
+  </style>
+  <script defer src="js/i18n.js"></script>
+  <script defer src="js/model.js"></script>
+  <script defer src="js/draw.js"></script>
+  <script defer src="js/scoring.js"></script>
+  <script defer src="js/input.js"></script>
+  <script defer src="js/scenes/red-light-runner.js"></script>
+  <script defer src="js/main.js"></script>
+</head>
+<body data-scene="red-light-runner">
+  <div class="page-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html" data-language-link data-i18n-aria="common.homeAria">
+        <span class="brand-mark" aria-hidden="true">11</span>
+        <span><strong class="brand-full" data-i18n="scene.redLight.brand">绿灯路口与闯红灯车辆</strong><strong class="brand-compact" data-i18n="scene.redLight.brandShort">绿灯与闯灯车</strong><small data-i18n="game.brandSub">防御性驾驶演练</small></span>
+      </a>
+      <div class="topbar-right">
+        <span class="episode" data-i18n="scene.redLight.episode">训练 11 / 路口扫视</span>
+        <a class="home-link" href="games.html" data-language-link data-i18n-aria="common.homeAria"><span aria-hidden="true">←</span><span data-i18n="common.home">游戏列表</span></a>
+        <button class="language-toggle" type="button" data-language-toggle>EN</button>
+        <button id="pause-button" class="icon-button" type="button" data-i18n-aria="game.pause" data-i18n-title="game.pauseTitle" aria-label="暂停游戏" title="暂停（P）" disabled>Ⅱ</button>
+      </div>
+    </header>
+
+    <main class="game-layout">
+      <section class="game-column" data-i18n-aria="game.region" aria-label="游戏区域">
+        <div id="game-frame" class="game-frame">
+          <canvas id="game-canvas" width="360" height="640" role="img" data-i18n-aria="scene.redLight.canvasAria" aria-label="俯视角绿灯路口。玩家方向始终为绿灯，横向方向始终为红灯；切换左侧、前方和右侧视野，观察真实来车并在必要时停车。">
+            <span data-i18n="game.canvasFallback">你的浏览器不支持 Canvas，请使用新版浏览器。</span>
+          </canvas>
+          <div class="hud" aria-live="polite">
+            <div class="hud-top"><span id="progress-label" class="hud-chip">教学路口 0 / 3</span><span id="timer-label" class="hud-chip">00:00</span></div>
+            <div id="coach-bubble" class="coach-bubble"><span id="coach-text">绿灯也要扫视左右</span></div>
+            <div class="speed-card"><div><span id="speed-value">0</span><small>km/h</small></div><span id="speed-status" class="speed-status">准备观察</span></div>
+          </div>
+          <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+          <div id="start-screen" class="screen-overlay">
+            <div class="pixel-sign runner-sign" aria-hidden="true"><span class="signal-own"></span><span class="signal-cross"></span><span class="runner-car"></span><span class="own-car"></span><span class="scan-line"></span></div>
+            <p class="eyebrow" data-i18n="scene.redLight.startEyebrow">防御性驾驶演练 · 11</p>
+            <h1><span data-i18n="scene.redLight.startTitleA">绿灯是通行权，</span><br><span data-i18n="scene.redLight.startTitleB">不是安全保证</span></h1>
+            <p class="lead"><span data-i18n="scene.redLight.startLeadA">进入路口前，先看左右真实来车。</span><br><span data-i18n="scene.redLight.startLeadB">为他人的违法与失误预留空间。</span></p>
+            <div class="lesson-strip">
+              <span><b>01</b><em data-i18n="scene.redLight.lesson1">开阔路口识别高速来车</em></span>
+              <span><b>02</b><em data-i18n="scene.redLight.lesson2">遮挡前控制可停车速度</em></span>
+              <span><b>03</b><em data-i18n="scene.redLight.lesson3">连续闯灯车全部清空</em></span>
+            </div>
+            <button id="start-button" class="primary-button" type="button"><span data-i18n="game.startButton">开始安全演练</span><span aria-hidden="true">→</span></button>
+            <p class="key-hint" data-i18n="scene.redLight.keyHint">W / S 加减速 · 1 / 2 / 3 切换左侧、前方、右侧视野</p>
+          </div>
+
+          <div id="pause-screen" class="screen-overlay compact" hidden>
+            <p class="eyebrow" data-i18n="game.paused">演练已暂停</p><h2 data-i18n="game.pauseTitleHeading">休息一下</h2><p class="lead" data-i18n="game.pauseText">暂停时间不会计入成绩。</p>
+            <button id="resume-button" class="primary-button" type="button"><span data-i18n="game.resumeButton">继续驾驶</span><span aria-hidden="true">→</span></button>
+            <button id="pause-restart-button" class="text-button" type="button" data-i18n="game.restart">重新开始本局</button>
+          </div>
+
+          <div id="failure-screen" class="screen-overlay compact failure-screen" hidden>
+            <div class="warning-icon" aria-hidden="true">!</div><p class="eyebrow" data-i18n="game.failureEyebrow">碰撞前 · 演练暂停</p>
+            <h2><span data-i18n="scene.redLight.failureTitleA">路权在你这边，</span><br><span data-i18n="scene.redLight.failureTitleB">防御仍不能缺席。</span></h2>
+            <p id="failure-reason" class="lead">横向来车仍在高速接近，应为它预留时间与空间。</p>
+            <div class="mini-lesson"><span data-i18n="game.correctAction">正确做法</span><p data-i18n="scene.redLight.failureLesson">这不是对绿灯通行的指责。进入路口前扫视左右，对高速接近且没有停车趋势的车辆提前控速；等所有来车离开冲突区，再平稳起步。</p></div>
+            <button id="demo-button" class="primary-button" type="button"><span data-i18n="game.watchDemo">看看正确示范</span><span aria-hidden="true">▶</span></button>
+            <button id="retry-button" class="text-button" type="button" data-i18n="scene.redLight.skipDemoRetry">跳过示范，从本路口前重试</button>
+          </div>
+
+          <div id="result-screen" class="screen-overlay result-screen" hidden>
+            <p id="result-kicker" class="eyebrow">演练完成</p><div class="grade-medal"><span id="result-grade">A</span><small data-i18n="game.gradeCaption">安全评价</small></div>
+            <h2 id="result-title">平稳防御</h2><p id="result-summary" class="lead">你没有把绿灯当成路口安全的保证。</p>
+            <div class="result-score"><strong id="result-total">95</strong><span>/ 100</span></div>
+            <div class="result-grid">
+              <div><span data-i18n="game.safety">安全</span><strong id="result-safety">40 / 40</strong></div><div><span data-i18n="game.observation">观察</span><strong id="result-observation">30 / 30</strong></div>
+              <div><span data-i18n="game.efficiency">效率</span><strong id="result-efficiency">15 / 20</strong></div><div><span data-i18n="game.smooth">平稳</span><strong id="result-smooth">10 / 10</strong></div>
+            </div>
+            <div id="result-advice" class="mini-lesson"><span data-i18n="result.adviceLabel">下一次可以更好</span><p id="result-advice-text"></p></div>
+            <div class="result-actions"><button id="new-game-button" class="primary-button" type="button"><span data-i18n="scene.redLight.newGame">再练三个绿灯路口</span><span aria-hidden="true">→</span></button><button id="same-game-button" class="text-button" type="button" data-i18n="game.sameGame">重玩同局</button></div>
+          </div>
+        </div>
+
+        <div class="controls-slot">
+          <div id="demo-screen" class="demo-overlay" hidden>
+            <div class="demo-caption"><span class="demo-badge" data-i18n="game.demoBadge">正确示范</span><strong id="demo-step">先扫视，再等待异常来车清空</strong><small id="demo-substep">示范字幕位于画布外，不遮挡停止线和冲突区</small></div>
+            <button id="skip-demo-button" class="text-button" type="button" data-i18n="game.skipDemo">跳过示范</button>
+          </div>
+        </div>
+        <div class="view-controls" data-i18n-aria="scene.redLight.viewsAria" aria-label="观察视野">
+          <button class="view-button" type="button" data-view="left" aria-pressed="false"><b>1</b><span data-i18n="scene.redLight.view.left">左侧观察</span></button>
+          <button class="view-button active" type="button" data-view="front" aria-pressed="true"><b>2</b><span data-i18n="scene.redLight.view.front">前方视野</span></button>
+          <button class="view-button" type="button" data-view="right" aria-pressed="false"><b>3</b><span data-i18n="scene.redLight.view.right">右侧观察</span></button>
+        </div>
+        <div class="touch-controls" data-i18n-aria="game.controls" aria-label="驾驶控制">
+          <div class="pedal-controls">
+            <button class="control-button throttle" type="button" data-control="throttle" data-i18n-aria="game.accelerate" aria-label="加速"><span aria-hidden="true">▲</span><small data-i18n="game.accelerate">加速</small></button>
+            <button class="control-button brake" type="button" data-control="brake" data-i18n-aria="game.brake" aria-label="制动"><span aria-hidden="true">▼</span><small data-i18n="game.brake">制动</small></button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="side-panel">
+        <section class="mission-card">
+          <p class="eyebrow" data-i18n="game.missionEyebrow">本次训练</p>
+          <h2><span data-i18n="scene.redLight.missionTitleA">绿灯照常通行，</span><br><span data-i18n="scene.redLight.missionTitleB">异常提前识别。</span></h2>
+          <p data-i18n="scene.redLight.missionText">三个路口都有真实闯红灯车辆。先观察左侧开阔来车，再处理右侧排队车遮挡，最后等待两辆先后闯灯的汽车完全清空。</p>
+          <div class="risk-key"><span class="risk-swatch"></span><div><strong data-i18n="scene.redLight.riskZone">左右真实观察区</strong><small data-i18n="scene.redLight.riskDescription">放大窗口与真实视锥、遮挡一致，点击按钮本身不得分</small></div></div>
+        </section>
+        <section class="score-card">
+          <div class="section-heading"><h3 data-i18n="game.rating">驾驶评价</h3><span data-i18n="game.points100">100 分制</span></div>
+          <div class="score-row"><span><i class="dot safety"></i><em data-i18n="game.safety">安全</em></span><strong>40</strong><small data-i18n="game.safetyRule">不进入危险冲突</small></div>
+          <div class="score-row"><span><i class="dot observe"></i><em data-i18n="game.observation">观察</em></span><strong>30</strong><small data-i18n="scene.redLight.observationRule">左右扫视 3 + 异常识别 4 + 清空确认 3</small></div>
+          <div class="score-row"><span><i class="dot efficient"></i><em data-i18n="game.efficiency">效率</em></span><strong>20</strong><small data-i18n="scene.redLight.efficiencyRule">必要让行不扣分，清空后无故停车会扣分</small></div>
+          <div class="score-row"><span><i class="dot smooth"></i><em data-i18n="game.smooth">平稳</em></span><strong>10</strong><small data-i18n="scene.redLight.smoothRule">避免临近急刹和路口抢行加速</small></div>
+        </section>
+        <section class="live-card">
+          <div class="section-heading"><h3 data-i18n="game.live">本次表现</h3><span id="live-seed">#0000</span></div>
+          <div class="live-stats"><div><strong id="slow-count">0</strong><span data-i18n="scene.redLight.live.observed">识别来车</span></div><div><strong id="brake-count">0</strong><span data-i18n="game.hardBrakes">急刹</span></div><div><strong id="passed-count">0</strong><span data-i18n="scene.redLight.live.safe">安全路口</span></div></div>
+          <div class="smooth-meter"><span id="smooth-meter-fill"></span></div><small id="smooth-caption">平稳驾驶 10 / 10</small>
+        </section>
+        <p class="side-note"><span aria-hidden="true">◇</span><em data-i18n="scene.redLight.sideNote">正常等灯车辆提供速度对照。闯灯车沿固定路线直行，不追踪玩家，也不会因为你踩油门才突然加速。</em></p>
+      </aside>
+    </main>
+    <footer data-i18n="common.footer">防御性驾驶科普 Demo · 具体交通规则请以当地法规为准</footer>
+  </div>
+  <noscript><span data-i18n="game.noscript">请启用 JavaScript 后进行安全演练。</span><br>Enable JavaScript to play. <a href="games.html">游戏列表 / All games</a></noscript>
+</body>
+</html>

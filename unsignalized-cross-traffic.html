@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101c26">
+  <link rel="icon" href="data:,">
+  <meta name="description" content="无信号灯路口的交叉来车：在建筑与植被遮挡下真正停车瞭望，按当地让行规则判断双方到达时序，看清并清空后再通过。" data-i18n-content="scene.crossTraffic.description">
+  <title data-i18n="scene.crossTraffic.documentTitle">无信号灯路口的交叉来车｜防御性驾驶训练</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .cross-sign { display: block; width: 126px; height: 76px; background: #26383e; overflow: hidden; }
+    .cross-sign::before { content: ""; position: absolute; left: 0; right: 0; top: 27px; height: 28px; background: #3b484b; border-top: 2px solid #91a18a33; border-bottom: 2px solid #91a18a33; }
+    .cross-sign .cross-building { position: absolute; z-index: 3; left: 0; top: 0; width: 47px; height: 27px; background: #ad8c65; border-bottom: 4px solid #665e54; }
+    .cross-sign .cross-building::after { content: ""; position: absolute; left: 9px; top: 7px; width: 10px; height: 8px; background: #80b9c1; box-shadow: 20px 0 0 #294651; }
+    .cross-sign .cross-car { position: absolute; z-index: 2; left: 76px; bottom: 3px; width: 25px; height: 34px; background: var(--mint); border: 3px solid #142832; }
+    .cross-sign .cross-other { position: absolute; z-index: 4; left: 15px; top: 32px; width: 34px; height: 20px; background: var(--yellow); border: 3px solid #142832; }
+    .cross-sign .cross-route { position: absolute; z-index: 1; left: 48px; top: 40px; width: 74px; border-top: 2px dashed var(--yellow); }
+    body[data-scene="unsignalized-cross-traffic"] .touch-controls { grid-template-columns: 1fr; gap: 10px; }
+    body[data-scene="unsignalized-cross-traffic"] .steering-controls,
+    body[data-scene="unsignalized-cross-traffic"] .pedal-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    body[data-scene="unsignalized-cross-traffic"] .controls-slot { position: relative; min-height: 0; margin-top: 0; }
+    body[data-scene="unsignalized-cross-traffic"] .controls-slot:has(.demo-overlay:not([hidden])) { min-height: 88px; margin-top: 12px; }
+    body[data-scene="unsignalized-cross-traffic"] .controls-slot .demo-overlay { inset: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; background: #142a34; border: 1px solid #3f625a; }
+    body[data-scene="unsignalized-cross-traffic"] .controls-slot .demo-overlay[hidden] { display: none; }
+    body[data-scene="unsignalized-cross-traffic"] .demo-caption { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; }
+    body[data-scene="unsignalized-cross-traffic"] .demo-caption strong { font-size: 12px; }
+    body[data-scene="unsignalized-cross-traffic"] .demo-caption small { font-size: 10px; line-height: 1.45; }
+    .role-replay-button { margin-top: 7px; }
+    body[data-scene="unsignalized-cross-traffic"] .screen-overlay h1 { font-size: 34px; }
+    @media (max-width: 760px) {
+      body[data-scene="unsignalized-cross-traffic"] .screen-overlay h1 { font-size: clamp(25px, 7.6vw, 29px); }
+      html[lang="en"] body[data-scene="unsignalized-cross-traffic"] .screen-overlay h1 { font-size: 32px; }
+    }
+    @media (max-width: 370px) {
+      .cross-sign { transform: scale(.88); transform-origin: center; }
+      html[lang="en"] body[data-scene="unsignalized-cross-traffic"] .screen-overlay h1 { font-size: 28px; }
+    }
+  </style>
+  <script defer src="js/i18n.js"></script>
+  <script defer src="js/model.js"></script>
+  <script defer src="js/draw.js"></script>
+  <script defer src="js/scoring.js"></script>
+  <script defer src="js/input.js"></script>
+  <script defer src="js/scenes/unsignalized-cross-traffic.js"></script>
+  <script defer src="js/main.js"></script>
+</head>
+<body data-scene="unsignalized-cross-traffic">
+  <div class="page-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html" data-language-link data-i18n-aria="common.homeAria">
+        <span class="brand-mark" aria-hidden="true">12</span>
+        <span><strong class="brand-full" data-i18n="scene.crossTraffic.brand">无信号灯路口的交叉来车</strong><strong class="brand-compact" data-i18n="scene.crossTraffic.brandShort">无灯路口交叉来车</strong><small data-i18n="game.brandSub">防御性驾驶演练</small></span>
+      </a>
+      <div class="topbar-right">
+        <span class="episode" data-i18n="scene.crossTraffic.episode">训练 12 / 无灯路口</span>
+        <a class="home-link" href="games.html" data-language-link data-i18n-aria="common.homeAria"><span aria-hidden="true">←</span><span data-i18n="common.home">游戏列表</span></a>
+        <button class="language-toggle" type="button" data-language-toggle>EN</button>
+        <button id="pause-button" class="icon-button" type="button" data-i18n-aria="game.pause" data-i18n-title="game.pauseTitle" aria-label="暂停游戏" title="暂停（P）" disabled>Ⅱ</button>
+      </div>
+    </header>
+
+    <main class="game-layout">
+      <section class="game-column" data-i18n-aria="game.region" aria-label="游戏区域">
+        <div id="game-frame" class="game-frame">
+          <canvas id="game-canvas" width="360" height="640" role="img" data-i18n-aria="scene.crossTraffic.canvasAria" aria-label="俯视角无信号灯交叉口。建筑或植被遮挡左右来车，在路口前停车瞭望，按规则与对方实际状态判断能否通过。">
+            <span data-i18n="game.canvasFallback">你的浏览器不支持 Canvas，请使用新版浏览器。</span>
+          </canvas>
+          <div class="hud" aria-live="polite">
+            <div class="hud-top"><span id="progress-label" class="hud-chip">路口 0 / 3</span><span id="timer-label" class="hud-chip">00:00</span></div>
+            <div id="coach-bubble" class="coach-bubble"><span class="coach-icon" aria-hidden="true">!</span><span id="coach-text">畅通路段保持 40–55 km/h，路口前提前减速</span></div>
+            <div class="speed-card"><div><span id="speed-value">0</span><small>km/h</small></div><span id="speed-status" class="speed-status">准备出发</span></div>
+          </div>
+          <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+          <div id="start-screen" class="screen-overlay">
+            <div class="pixel-sign cross-sign" aria-hidden="true"><span class="cross-building"></span><span class="cross-car"></span><span class="cross-other"></span><span class="cross-route"></span></div>
+            <p class="eyebrow" data-i18n="scene.crossTraffic.startEyebrow">防御性驾驶演练 · 12</p>
+            <h1><span data-i18n="scene.crossTraffic.startTitleA">先停车看清，</span><br><span data-i18n="scene.crossTraffic.startTitleB">再决定能否通过</span></h1>
+            <p class="lead"><span data-i18n="scene.crossTraffic.startLeadA">看不见，不代表没有车；有优先权，也不等于绝对安全。</span><br><span data-i18n="scene.crossTraffic.startLeadB">按规则让行，同时确认双方不会同时进入冲突区。</span></p>
+            <div class="lesson-strip">
+              <span><b>01</b><em data-i18n="scene.crossTraffic.lesson1">右方来车，按规则让行</em></span>
+              <span><b>02</b><em data-i18n="scene.crossTraffic.lesson2">对方让行，确认再通行</em></span>
+              <span><b>03</b><em data-i18n="scene.crossTraffic.lesson3">对方未让，主动防守</em></span>
+            </div>
+            <button id="start-button" class="primary-button" type="button"><span data-i18n="game.startButton">开始安全演练</span><span aria-hidden="true">→</span></button>
+            <p class="key-hint" data-i18n="scene.crossTraffic.keyHint">W / ↑ 加速 · S / ↓ / 空格制动 · A、D / ←、→ 本车道内微调</p>
+          </div>
+
+          <div id="pause-screen" class="screen-overlay compact" hidden>
+            <p class="eyebrow" data-i18n="game.paused">演练已暂停</p><h2 data-i18n="game.pauseTitleHeading">休息一下</h2><p data-i18n="game.pauseText">暂停时间不会计入成绩。</p>
+            <button id="resume-button" class="primary-button" type="button"><span data-i18n="game.resumeButton">继续驾驶</span><span aria-hidden="true">→</span></button>
+            <button id="pause-restart-button" class="text-button" type="button" data-i18n="game.restart">重新开始本局</button>
+          </div>
+
+          <div id="failure-screen" class="screen-overlay compact failure-screen" hidden>
+            <div class="warning-icon" aria-hidden="true">!</div><p class="eyebrow" data-i18n="game.failureEyebrow">碰撞前 · 演练暂停</p>
+            <h2><span data-i18n="scene.crossTraffic.failureTitleA">不是比谁先到，</span><br><span data-i18n="scene.crossTraffic.failureTitleB">而是别同时进入。</span></h2>
+            <p id="failure-reason" class="lead">双方正在接近同一冲突区，当前速度和空间已经不足以安全避让。</p>
+            <div class="mini-lesson"><span data-i18n="game.correctAction">正确做法</span><p data-i18n="scene.crossTraffic.failureLesson">在路口外真正停稳，扫视左右。按当前规则让右方来车；对方持续通过时等车尾与缓冲完全离开，对方真实停稳让行时确认后再走。</p></div>
+            <button id="demo-button" class="primary-button" type="button"><span data-i18n="game.watchDemo">看看正确示范</span><span aria-hidden="true">▶</span></button>
+            <button id="role-replay-button" class="text-button role-replay-button" type="button" data-i18n="scene.crossTraffic.roleReplay">看看双方当时能看到什么</button>
+            <button id="retry-button" class="text-button" type="button" data-i18n="scene.crossTraffic.skipDemoRetry">跳过示范，从本次路口前重试</button>
+          </div>
+
+          <div id="result-screen" class="screen-overlay result-screen" hidden>
+            <p id="result-kicker" class="eyebrow">演练完成</p><div class="grade-medal"><span id="result-grade">A</span><small data-i18n="game.gradeCaption">安全评价</small></div>
+            <h2 id="result-title">平稳防御</h2><p id="result-summary" class="lead">你先看清，再通过，没有和交叉来车争先后。</p>
+            <div class="result-score"><strong id="result-total">92</strong><span>/ 100</span></div>
+            <div class="result-grid">
+              <div><span data-i18n="game.safety">安全</span><strong id="result-safety">40 / 40</strong></div><div><span data-i18n="game.observation">观察</span><strong id="result-observation">30 / 30</strong></div>
+              <div><span data-i18n="game.efficiency">效率</span><strong id="result-efficiency">18 / 20</strong></div><div><span data-i18n="game.smooth">平稳</span><strong id="result-smooth">10 / 10</strong></div>
+            </div>
+            <div id="result-advice" class="mini-lesson"><span data-i18n="result.adviceLabel">下一次可以更好</span><p id="result-advice-text"></p></div>
+            <div class="result-actions"><button id="new-game-button" class="primary-button" type="button"><span data-i18n="scene.crossTraffic.newGame">再练三组交叉来车</span><span aria-hidden="true">→</span></button><button id="same-game-button" class="text-button" type="button" data-i18n="game.sameGame">重玩同局</button><button id="result-role-button" class="text-button" type="button" data-i18n="scene.crossTraffic.roleReplayResult">用相同路口进行双方视角复盘</button></div>
+          </div>
+        </div>
+
+        <div class="controls-slot">
+          <div id="demo-screen" class="demo-overlay" hidden>
+            <div class="demo-caption"><span class="demo-badge" data-i18n="game.demoBadge">正确示范</span><strong id="demo-step">路口外停稳，扫视左右</strong><small id="demo-substep">根据规则、可见状态与双方时序决定何时通过</small></div>
+            <button id="skip-demo-button" class="text-button" type="button" data-i18n="game.skipDemo">跳过示范</button>
+          </div>
+        </div>
+        <div class="touch-controls" data-i18n-aria="game.controls" aria-label="驾驶控制">
+          <div class="steering-controls">
+            <button class="control-button steer" type="button" data-control="left" data-i18n-aria="game.left" aria-label="向左微调"><span aria-hidden="true">◀</span><small data-i18n="game.leftShort">左移</small></button>
+            <button class="control-button steer" type="button" data-control="right" data-i18n-aria="game.right" aria-label="向右微调"><span aria-hidden="true">▶</span><small data-i18n="game.rightShort">右移</small></button>
+          </div>
+          <div class="pedal-controls">
+            <button class="control-button throttle" type="button" data-control="throttle" data-i18n-aria="game.accelerate" aria-label="加速"><span aria-hidden="true">▲</span><small data-i18n="game.accelerate">加速</small></button>
+            <button class="control-button brake" type="button" data-control="brake" data-i18n-aria="game.brake" aria-label="制动"><span aria-hidden="true">▼</span><small data-i18n="game.brake">制动</small></button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="side-panel">
+        <section class="mission-card">
+          <p class="eyebrow" data-i18n="game.missionEyebrow">本次训练</p>
+          <h2><span data-i18n="scene.crossTraffic.missionTitleA">规则决定让行顺序，</span><br><span data-i18n="scene.crossTraffic.missionTitleB">观察决定能否安全走。</span></h2>
+          <p data-i18n="scene.crossTraffic.missionText">三处路口分别出现右方来车、左方正常让行和左方未及时让行。行为计划只由种子决定，不因你的踏板临时改变；游戏不评价对方的事故责任。</p>
+          <div class="risk-key"><span class="risk-swatch"></span><div><strong data-i18n="scene.crossTraffic.ruleTitle">当前 CN 规则包</strong><small data-i18n="scene.crossTraffic.ruleText">无信号、标志、标线控制或交警指挥时，进入路口前停车瞭望，让右方来车先行</small></div></div>
+        </section>
+        <section class="score-card">
+          <div class="section-heading"><h3 data-i18n="game.rating">驾驶评价</h3><span data-i18n="game.points100">100 分制</span></div>
+          <div class="score-row"><span><i class="dot safety"></i><em data-i18n="game.safety">安全</em></span><strong>40</strong><small data-i18n="game.safetyRule">不进入危险冲突</small></div>
+          <div class="score-row"><span><i class="dot observe"></i><em data-i18n="game.observation">观察</em></span><strong>30</strong><small data-i18n="scene.crossTraffic.observationRule">提前控速 3 + 停车瞭望 3 + 正确判断 4</small></div>
+          <div class="score-row"><span><i class="dot efficient"></i><em data-i18n="game.efficiency">效率</em></span><strong>20</strong><small data-i18n="scene.crossTraffic.efficiencyRule">必要停车与让行不扣分，安全后及时恢复巡航</small></div>
+          <div class="score-row"><span><i class="dot smooth"></i><em data-i18n="game.smooth">平稳</em></span><strong>10</strong><small data-i18n="scene.crossTraffic.smoothRule">避免临近急刹与反复猛打方向</small></div>
+        </section>
+        <section class="live-card">
+          <div class="section-heading"><h3 data-i18n="game.live">本次表现</h3><span id="live-seed">#0000</span></div>
+          <div class="live-stats"><div><strong id="slow-count">0</strong><span data-i18n="scene.crossTraffic.liveStops">停车瞭望</span></div><div><strong id="brake-count">0</strong><span data-i18n="game.hardBrakes">急刹</span></div><div><strong id="passed-count">0</strong><span data-i18n="game.cleanPasses">安全通过</span></div></div>
+          <div class="smooth-meter"><span id="smooth-meter-fill"></span></div><small id="smooth-caption">平稳驾驶 10 / 10</small>
+        </section>
+        <p class="side-note"><span aria-hidden="true">◇</span><em data-i18n="scene.crossTraffic.sideNote">虚线观察区是教学参考，不是新增法规标志。英文只翻译界面，不改变当前规则包、车辆计划或成绩。</em></p>
+      </aside>
+    </main>
+    <footer data-i18n="common.footer">防御性驾驶科普 Demo · 具体交通规则请以当地法规为准</footer>
+  </div>
+  <noscript><span data-i18n="game.noscript">请启用 JavaScript 后进行安全演练。</span><br>Enable JavaScript to play. <a href="games.html">游戏列表 / All games</a></noscript>
+</body>
+</html>
